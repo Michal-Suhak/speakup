@@ -9,7 +9,8 @@
 
 ## Changes
 
-<!-- Grouped by area, one line per file or module. Keep only the groups that apply. -->
+<!-- Only files changed in this PR, one line each: what changed in it (not what the file is).
+     Keep only the groups that apply. -->
 
 ### Backend
 -

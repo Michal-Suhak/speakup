@@ -53,7 +53,7 @@ Always fill `.github/pull_request_template.md`:
 
 - **Summary**: 1–3 sentences, what changes and why.
 - **Spec**: link to `docs/specs/NNNN-*.md`, or "None" for fixes and refactors.
-- **Changes**: grouped by area (Backend, Frontend, Prompts, Docs and config), one line per file or module; drop empty groups.
+- **Changes**: only what this PR changes (`git diff main...HEAD --stat`), never a tour of the repo. One line per changed file or module saying *what changed in it*, not what the file is for. Use only the template groups (Backend, Frontend, Prompts, Docs and config) and drop empty ones. Many similar files (e.g. a renamed folder) go in one line.
 - **How to test**: exact steps to run and verify. For PRs without runtime changes (docs, specs, `.claude/`, config) write "Not applicable: no runtime changes." instead of inventing steps.
 - **Checklist**: Claude's responsibility, not the reviewer's. Before opening or updating the PR, check every item against the diff and tick it when it holds. An item that the diff cannot violate (e.g. no Python code, so no prompt text in Python) holds and is ticked. An item that does not hold stays unticked and must be fixed before asking for review, or explained in "Open points".
 - **Open points**: only what genuinely needs the reviewer's decision, known limitations and follow-ups, or "None". Resolve inconsistencies you find before opening the PR instead of listing them here.
