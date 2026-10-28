@@ -4,6 +4,7 @@
 
 - Simple and readable over clever. No abstractions without a second use case: no base classes with one subclass, no factories, no config for values that never change.
 - Fewest files that keep responsibilities clear. Follow the structure in `docs/specs/0001-mvp.md`.
+- Layers: `app.py` only creates the app (routers, error handlers, static files); endpoints live in `api/<area>.py` as an `APIRouter` and stay thin (parse request, call `tutor/`, map the result); domain logic lives in `tutor/` and never imports FastAPI. Domain errors are mapped to HTTP status codes by exception handlers in `app.py`.
 - Names, code, comments and log messages in English. Docs in `docs/` and the README in English. User-facing UI text in Polish.
 - Match the surrounding code: naming, idioms, error handling.
 
