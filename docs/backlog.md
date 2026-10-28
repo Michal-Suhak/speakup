@@ -6,8 +6,7 @@ To work on an item: discuss it, create a spec with the `feature-spec` skill, and
 
 ## Ideas
 
-- **Database (SQLite)** – one local file instead of JSON once there is history to store (sessions, progress, vocabulary); decide whether profiles move there too.
-- **Session history and progress** – save finished sessions and show progress over time.
+- **Session history and progress in SQLite** – save finished sessions and show progress over time; introduce SQLite (one local file) here, as the first feature that needs a database, and decide whether profiles move there too.
 - **Vocabulary list with spaced repetition** – collect useful words from summaries and review them later.
 - **Recurring mistakes across sessions** – detect mistakes the learner keeps making and practise them.
 - **Roleplay scenes** – restaurant, hotel, airport, job interview.
