@@ -29,7 +29,7 @@ A local tutor for practising spoken English. You talk to it by voice, it answers
 3. Copy the settings file and put your key in `OPENAI_API_KEY`:
 
    ```bash
-   cp .env.example .env
+   cp env.example .env
    ```
 
    `.env` stays on your machine and is never committed.
