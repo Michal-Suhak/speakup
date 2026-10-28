@@ -44,6 +44,7 @@
 - [ ] README updated if setup or run steps changed
 - [ ] Tested locally as described above (or not applicable)
 - [ ] Small, focused PR: one spec stage, fix or refactor
+- [ ] `/code-review` run on `main...HEAD`; findings fixed or explained in "Open points"
 
 ## Open points
 
