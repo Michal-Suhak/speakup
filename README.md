@@ -1,50 +1,50 @@
 # SpeakUp
 
-Lokalny tutor do ćwiczenia mówienia po angielsku. Rozmawiasz z nim głosowo, a on odpowiada, prowadzi rozmowę i poprawia ważne błędy. Wszystkie modele działają przez OpenAI API.
+A local tutor for practising spoken English. You talk to it by voice, it answers, keeps the conversation going and corrects important mistakes. All models run through the OpenAI API.
 
-> Projekt jest w budowie. Aktualny etap i plan: [docs/specs/0001-mvp.md](docs/specs/0001-mvp.md).
+> Work in progress. Current stage and plan: [docs/specs/0001-mvp.md](docs/specs/0001-mvp.md).
 
-## Wymagania
+## Requirements
 
-- macOS, Linux lub Windows
-- [uv](https://docs.astral.sh/uv/) (sam zainstaluje odpowiednią wersję Pythona)
-- klucz API OpenAI ([platform.openai.com](https://platform.openai.com/api-keys)); API jest płatne osobno od ChatGPT, warto ustawić limit wydatków na koncie
+- macOS, Linux or Windows
+- [uv](https://docs.astral.sh/uv/) (it installs a matching Python version itself)
+- an OpenAI API key ([platform.openai.com](https://platform.openai.com/api-keys)); the API is billed separately from ChatGPT, so set a spending limit on your account
 
-## Instalacja
+## Installation
 
-1. Zainstaluj uv (macOS / Linux):
+1. Install uv (macOS / Linux):
 
    ```bash
    curl -LsSf https://astral.sh/uv/install.sh | sh
    ```
 
-   Na macOS możesz też użyć `brew install uv`.
+   On macOS you can also use `brew install uv`.
 
-2. W folderze projektu zainstaluj zależności:
+2. Install the dependencies in the project folder:
 
    ```bash
    uv sync
    ```
 
-3. Skopiuj plik z ustawieniami i wpisz swój klucz w `OPENAI_API_KEY`:
+3. Copy the settings file and put your key in `OPENAI_API_KEY`:
 
    ```bash
    cp .env.example .env
    ```
 
-   Plik `.env` zostaje tylko u Ciebie i nie trafia do repozytorium.
+   `.env` stays on your machine and is never committed.
 
-## Sprawdzenie klucza
+## Checking the key
 
 ```bash
 uv run python config.py
 ```
 
-Jeśli wszystko działa, zobaczysz `OK: key works`. W przeciwnym razie pojawi się komunikat, co poprawić (brak klucza, zły klucz albo brak internetu).
+If everything works you will see `OK: key works`. Otherwise a message tells you what to fix (missing key, wrong key or no internet connection).
 
-## Uruchomienie
+## Running
 
-Aplikacja pojawi się w kolejnych etapach. Komenda startowa będzie wyglądać tak:
+The app arrives in the next stages. It will be started with:
 
 ```bash
 uv run uvicorn app:app --reload
