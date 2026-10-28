@@ -26,5 +26,6 @@ Project skills live in `.claude/skills/`: `feature-spec`, `tutor-prompt`, `opena
 
 ```bash
 uv sync
+uv run pytest
 uv run uvicorn app:app --reload
 ```

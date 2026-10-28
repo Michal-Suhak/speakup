@@ -34,6 +34,12 @@ A local tutor for practising spoken English. You talk to it by voice, it answers
 
    `.env` stays on your machine and is never committed.
 
+## Running the tests
+
+```bash
+uv run pytest
+```
+
 ## Checking the key
 
 ```bash

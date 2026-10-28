@@ -1,16 +1,23 @@
 import os
 import sys
+from pathlib import Path
 
 from dotenv import load_dotenv
 
 load_dotenv()
+
+BASE_DIR = Path(__file__).resolve().parent
+PROFILES_DIR = BASE_DIR / "profiles"
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 STT_MODEL = os.getenv("STT_MODEL", "gpt-4o-mini-transcribe")
 CHAT_MODEL = os.getenv("CHAT_MODEL", "gpt-6-luna")
 TTS_MODEL = os.getenv("TTS_MODEL", "gpt-4o-mini-tts")
 TTS_VOICE = os.getenv("TTS_VOICE", "marin")
+LEVELS = ("A1", "A2", "B1", "B2", "C1", "C2")
 DEFAULT_LEVEL = os.getenv("DEFAULT_LEVEL", "B1")
+if DEFAULT_LEVEL not in LEVELS:
+    sys.exit(f"DEFAULT_LEVEL in .env must be one of {', '.join(LEVELS)}, got {DEFAULT_LEVEL!r}.")
 
 
 def require_api_key() -> str:
