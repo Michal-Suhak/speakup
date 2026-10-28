@@ -1,6 +1,6 @@
 # SpeakUp
 
-Local app for practising spoken English with a voice tutor. User speaks (push-to-talk), backend runs OpenAI STT → chat → TTS, browser plays the answer and shows the transcript. Target user: Polish learner, levels A1–C2 (default A2/B1), learner profiles in `profiles/`.
+Local app for practising spoken English with a voice tutor. User speaks (push-to-talk), backend runs OpenAI STT → chat → TTS, browser plays the answer and shows the transcript. Target user: Polish learner, levels A1–C2 (default B1), learner profiles in `profiles/`.
 
 - Scope lives in `docs/specs/` (live documentation). MVP: `docs/specs/0001-mvp.md`. Every new feature starts as a spec there (skill `feature-spec`), code follows the accepted spec, and the spec is updated together with the code.
 - Background guidelines: [docs/guidelines/](../docs/guidelines/README.md) (architecture, prompts, memory, pedagogy, structured output, voice, evals). Read the relevant file before designing a new area.
