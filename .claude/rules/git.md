@@ -7,13 +7,20 @@
 - Never commit `.env`, `local/`, `sessions/`, `.venv/`, `__pycache__/` or audio files.
 - Check `git status` and the diff before committing.
 
+## Small changes, small PRs
+
+- One PR = one reviewable change: one spec stage, one fix or one refactor. Never mix them.
+- Aim for a diff a reviewer can read in about 15 minutes: roughly up to 300 changed lines of code (docs and lock files excluded). Bigger work is split into several PRs, each leaving `main` working.
+- Large specs are delivered stage by stage (e.g. one PR per stage of `0001-mvp.md`), with the spec checklist ticked in each PR.
+- Commits inside a PR are small and focused too; they are squashed on merge, so they serve the review, not the history.
+
 ## Flow
 
 1. `main` only changes through PRs. Never commit directly to `main`.
-2. Branch from an up-to-date `main`, one branch per spec or fix.
+2. Branch from an up-to-date `main`, one branch per PR.
 3. Commit, push the branch, open a PR to `main` with `gh pr create`, using `.github/pull_request_template.md`.
 4. Review fixes go as new commits on the same branch, no force-push after the PR is opened unless the user asks.
-5. PRs are squash-merged, so the PR title becomes the commit on `main`.
+5. PRs are always squash-merged, so the PR title becomes the single commit on `main`.
 
 ## Branch names
 
@@ -47,8 +54,8 @@ Always fill `.github/pull_request_template.md`:
 - **Summary**: 1–3 sentences, what changes and why.
 - **Spec**: link to `docs/specs/NNNN-*.md`, or "None" for fixes and refactors.
 - **Changes**: grouped by area (Backend, Frontend, Prompts, Docs and config), one line per file or module; drop empty groups.
-- **How to test**: exact steps to run and verify.
-- **Checklist**: tick only what is true; leave unticked items visible and explain them in "Open points".
-- **Open points**: decisions for the reviewer, known limitations, follow-ups, or "None".
+- **How to test**: exact steps to run and verify. For PRs without runtime changes (docs, specs, `.claude/`, config) write "Not applicable: no runtime changes." instead of inventing steps.
+- **Checklist**: Claude's responsibility, not the reviewer's. Before opening or updating the PR, check every item against the diff and tick it when it holds. An item that the diff cannot violate (e.g. no Python code, so no prompt text in Python) holds and is ticked. An item that does not hold stays unticked and must be fixed before asking for review, or explained in "Open points".
+- **Open points**: only what genuinely needs the reviewer's decision, known limitations and follow-ups, or "None". Resolve inconsistencies you find before opening the PR instead of listing them here.
 
 Keep it factual: no marketing language, no AI attribution, no repeated content from the spec beyond a link.
