@@ -3,7 +3,7 @@ from typing import Annotated, Literal
 from annotated_types import MaxLen
 from pydantic import BaseModel, Field
 
-MAX_CORRECTIONS = 3
+MAX_CORRECTIONS = 5
 
 
 class Correction(BaseModel):
@@ -58,8 +58,8 @@ class TutorTurn(BaseModel):
     )
     corrections: Annotated[list[Correction], MaxLen(MAX_CORRECTIONS)] = Field(
         description=(
-            f"Every real language mistake in the learner's last message, most important first, at most "
-            f"{MAX_CORRECTIONS}. List minor mistakes too and mark them with severity; the app decides which ones "
+            f"Every real language mistake in the learner's last message, at most {MAX_CORRECTIONS}: all important "
+            "ones first, then minor ones. List minor mistakes too and mark them with severity; the app decides which ones "
             "to show. Do not report typos, punctuation, capitalisation or speech recognition errors. "
             "Empty list when the message has no mistakes and at the start of a session."
         )

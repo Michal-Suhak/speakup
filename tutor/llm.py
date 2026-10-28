@@ -1,11 +1,13 @@
 from functools import lru_cache
 from string import Template
 
-from openai import APIError, OpenAI
+from openai import OpenAI, OpenAIError
 from pydantic import ValidationError
 
 import config
 from tutor.schemas import Correction, TutorTurn
+
+MAX_VISIBLE_CORRECTIONS = 3
 from tutor.session import Message, Session
 
 PROMPTS_DIR = config.BASE_DIR / "prompts"
@@ -63,7 +65,7 @@ def _ask(instructions: str, messages: list[Message]) -> TutorTurn:
                 text_format=TutorTurn,
                 max_output_tokens=MAX_OUTPUT_TOKENS,
             )
-        except APIError as error:
+        except OpenAIError as error:
             raise LLMError(f"OpenAI request failed ({type(error).__name__}). Try again in a moment.") from error
         except ValidationError:
             continue
@@ -74,11 +76,13 @@ def _ask(instructions: str, messages: list[Message]) -> TutorTurn:
 
 def visible_corrections(turn: TutorTurn, user_text: str, correction_style: str) -> list[Correction]:
     said = user_text.casefold()
-    return [
+    shown = [
         c
         for c in turn.corrections
         if c.you_said.strip().casefold() in said and (correction_style == "strict" or c.severity == "important")
     ]
+    shown.sort(key=lambda c: c.severity != "important")
+    return shown[:MAX_VISIBLE_CORRECTIONS]
 
 
 def start(session: Session) -> TutorTurn:

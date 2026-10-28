@@ -234,6 +234,12 @@ def api_error():
     return openai.APIConnectionError(request=httpx2.Request("POST", "https://api.openai.com/v1/responses"))
 
 
+def sdk_error():
+    import openai
+
+    return openai.OpenAIError("Output was cut off.")
+
+
 def validation_error():
     from pydantic import ValidationError
 
@@ -243,7 +249,7 @@ def validation_error():
         return error
 
 
-@pytest.mark.parametrize("result", [api_error(), validation_error(), Parsed(None)])
+@pytest.mark.parametrize("result", [api_error(), sdk_error(), validation_error(), Parsed(None)])
 def test_ask_maps_failures_to_llm_error(monkeypatch, result):
     monkeypatch.setattr(llm, "get_client", lambda: FakeClient(result))
     with pytest.raises(LLMError):

@@ -20,7 +20,7 @@ The tutor's answer to one learner message (and the greeting at session start).
 | # | Field | Type | Role in the cascade |
 |---|---|---|---|
 | 1 | `analysis` | `str` | Attention anchor: 1-2 sentences on what the learner meant and which mistakes the message has. Not shown to the learner. |
-| 2 | `corrections` | `list[Correction]`, max 3 | Every real mistake from the learner's last message, most important first; minor ones too. |
+| 2 | `corrections` | `list[Correction]`, max 5 | Every real mistake from the learner's last message, important ones first; minor ones too. |
 | 3 | `reply` | `str` | What the tutor says: 2-4 TTS-friendly sentences ending with a question, with the needed fixes woven in. |
 
 ## `Correction`
@@ -40,7 +40,8 @@ The tutor's answer to one learner message (and the greeting at session start).
 - **Start of session:** corrections are dropped; only `reply` is stored and returned.
 - **Text turn:** a correction is shown only when
   - its `you_said` appears in the learner's message (case-insensitive), and
-  - the profile's `correction_style` is `strict`, or the correction's `severity` is `important`.
+  - the profile's `correction_style` is `strict`, or the correction's `severity` is `important`;
+  - important corrections come first and at most 3 are shown.
 - The reply is stored in the session history; `analysis` is discarded.
 
 Public response of `POST /api/text` (unchanged from the spec):

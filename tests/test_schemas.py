@@ -1,5 +1,4 @@
 import pytest
-from openai.lib._pydantic import to_strict_json_schema
 from pydantic import ValidationError
 
 from tutor import llm
@@ -26,7 +25,7 @@ def test_field_order_is_analysis_corrections_reply():
 
 
 def test_strict_schema_carries_rules():
-    schema = to_strict_json_schema(TutorTurn)
+    schema = TutorTurn.model_json_schema()
     correction_schema = schema["$defs"]["Correction"]["properties"]
 
     assert schema["properties"]["corrections"]["maxItems"] == MAX_CORRECTIONS
@@ -52,6 +51,17 @@ def test_visible_corrections_follow_style(style, expected):
     )
     visible = llm.visible_corrections(turn, "Yesterday I go there to the beach", style)
     assert [c.you_said for c in visible] == expected
+
+
+def test_visible_corrections_put_important_first_and_cap():
+    text = "a b c d e"
+    turn = TutorTurn(
+        analysis="x",
+        corrections=[correction("a", "minor"), correction("b", "minor"), correction("c"), correction("d"), correction("e")],
+        reply="Hi?",
+    )
+    visible = llm.visible_corrections(turn, text, "strict")
+    assert [c.you_said for c in visible] == ["c", "d", "e"]
 
 
 def test_start_drops_corrections(monkeypatch):
