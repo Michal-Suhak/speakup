@@ -22,7 +22,7 @@ Specs in `docs/specs/` are the live documentation of SpeakUp. Process and status
    - "Acceptance criteria" are binary and checkable.
 5. Unknowns go to "Risks and open questions" as checkboxes, not into guesses in the design.
 6. Check against `.claude/rules/` (boundaries, approach) and existing specs. If it conflicts with an accepted spec, say so and record it in "Depends on" / "Supersedes".
-7. Add a row to the index in `docs/specs/README.md`.
+7. Add a row to the index in `docs/specs/README.md`. If the spec comes from `docs/backlog.md`, remove that item there.
 8. Show the user a short summary and the open questions. Do not start implementing a `draft`.
 
 ## Updating a spec
