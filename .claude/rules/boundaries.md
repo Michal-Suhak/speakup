@@ -11,7 +11,7 @@
 
 - Moving a spec to `accepted`, `done`, `rejected` or changing the MVP scope.
 - Implementing anything that has no `accepted` spec (except bug fixes and refactors without behaviour change).
-- Adding a dependency to `requirements.txt`.
+- Adding a dependency (`uv add`).
 - Changing the stack (framework, frontend library, database, Realtime API).
 - Changing public endpoints, the turn JSON (`reply` + `corrections`), the summary JSON or the profile format.
 - Changing OpenAI models in config (cost impact).

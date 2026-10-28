@@ -8,7 +8,7 @@ Local app for practising spoken English with a voice tutor. User speaks (push-to
 
 ## Stack
 
-Python 3.11+, FastAPI, uvicorn, `openai` SDK, `python-dotenv`. Frontend: plain HTML/CSS/JS, `MediaRecorder`. No frontend framework, no build step.
+Python 3.11+, FastAPI, uvicorn, `openai` SDK, `python-dotenv`. Dependencies and the virtualenv are managed with uv (`pyproject.toml` + committed `uv.lock`), never pip or `requirements.txt`. Frontend: plain HTML/CSS/JS, `MediaRecorder`. No frontend framework, no build step.
 
 ## Rules
 
@@ -25,7 +25,6 @@ Project skills live in `.claude/skills/`: `feature-spec`, `tutor-prompt`, `opena
 ## Commands
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app:app --reload
+uv sync
+uv run uvicorn app:app --reload
 ```
