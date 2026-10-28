@@ -36,5 +36,6 @@
 
 ## Tests
 
-- Non-trivial logic (state updates, parsing, validation) gets one small runnable test. No test frameworks or fixtures beyond what is needed.
+- Tests use pytest (`uv run pytest`), files in `tests/test_*.py`. Non-trivial logic (state updates, parsing, validation) and every endpoint get tests; prefer plain functions, `parametrize`, and built-in fixtures (`tmp_path`, `monkeypatch`).
+- Endpoints are tested through `fastapi.testclient.TestClient`, so status codes and error messages are checked as the frontend sees them.
 - Do not hit the real OpenAI API in unit tests; test prompt rendering and parsing with fixed inputs.
