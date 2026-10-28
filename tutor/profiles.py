@@ -55,9 +55,13 @@ def _read(path: Path) -> Profile:
     try:
         profile = Profile.model_validate_json(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeDecodeError, ValidationError) as error:
-        raise BrokenProfile(f"profiles/{path.name} is not a valid profile ({type(error).__name__}).") from None
+        raise BrokenProfile(
+            f"profiles/{path.name} is not a valid profile ({type(error).__name__}). Fix or delete the file."
+        ) from None
     if profile.id != path.stem:
-        raise BrokenProfile(f"profiles/{path.name} contains id {profile.id!r}; the id must match the file name.")
+        raise BrokenProfile(
+            f"profiles/{path.name} contains id {profile.id!r}; the id must match the file name. Fix or delete the file."
+        )
     return profile
 
 
