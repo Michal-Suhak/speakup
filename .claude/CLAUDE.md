@@ -17,7 +17,7 @@ Project rules live in `.claude/rules/`:
 - `approach.md` – how to design and solve things in this project
 - `boundaries.md` – what is allowed, what needs asking, what is off limits
 - `code-style.md` – how code is written (including: no unnecessary comments)
-- `git.md` – commits (no Co-Authored-By or any AI attribution)
+- `git.md` – branches, commits, PR titles and descriptions (template: `.github/pull_request_template.md`), no AI attribution
 - `docs.md` – specs workflow and keeping docs in sync with code
 
 Project skills live in `.claude/skills/`: `feature-spec`, `tutor-prompt`, `openai-integration`, `voice-pipeline`, `tutor-eval`.
