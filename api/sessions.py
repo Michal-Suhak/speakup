@@ -4,7 +4,6 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, StringConstraints
 
 from tutor import llm
-from tutor.llm import TutorTurn
 from tutor.profiles import load_profile
 from tutor.session import Session, get_session, register_session
 
@@ -29,6 +28,17 @@ class TextRequest(BaseModel):
     text: UserText
 
 
+class CorrectionOut(BaseModel):
+    you_said: str
+    better: str
+    explanation_pl: str
+
+
+class TurnResponse(BaseModel):
+    reply: str
+    corrections: list[CorrectionOut]
+
+
 @router.post("/session")
 def start_session(request: StartRequest) -> StartResponse:
     profile = load_profile(request.profile_id)
@@ -41,5 +51,6 @@ def start_session(request: StartRequest) -> StartResponse:
 
 
 @router.post("/text")
-def text_turn(request: TextRequest) -> TutorTurn:
-    return llm.reply(get_session(request.session_id), request.text)
+def text_turn(request: TextRequest) -> TurnResponse:
+    turn = llm.reply(get_session(request.session_id), request.text)
+    return TurnResponse.model_validate(turn, from_attributes=True)

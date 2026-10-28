@@ -5,7 +5,8 @@ from fastapi.testclient import TestClient
 
 from app import app
 from tutor import llm, profiles, session
-from tutor.llm import Correction, LLMError, LLMUnavailable, TutorTurn
+from tutor.llm import LLMError, LLMUnavailable
+from tutor.schemas import Correction, TutorTurn
 from tutor.profiles import Profile, save_profile
 from tutor.session import Message, Session
 
@@ -34,8 +35,8 @@ def calls(monkeypatch):
         recorded.append((instructions, list(messages)))
         corrections = []
         if messages[-1].content == "I go there yesterday":
-            corrections = [Correction(you_said="I go", better="I went", explanation_pl="Czas przeszły.")]
-        return TutorTurn(corrections=corrections, reply=f"Reply {len(recorded)}?")
+            corrections = [Correction(you_said="I go", better="I went", mistake_type="grammar", severity="important", explanation_pl="Czas przeszły.")]
+        return TutorTurn(analysis="Notes.", corrections=corrections, reply=f"Reply {len(recorded)}?")
 
     monkeypatch.setattr(llm, "_ask", fake_ask)
     return recorded
@@ -143,7 +144,7 @@ def test_parallel_turn_is_409(client, monkeypatch):
         if len(messages) > 1:
             entered.set()
             release.wait(5)
-        return TutorTurn(corrections=[], reply="Hi?")
+        return TutorTurn(analysis="Notes.", corrections=[], reply="Hi?")
 
     monkeypatch.setattr(llm, "_ask", slow_ask)
     session_id = start(client).json()["session_id"]
@@ -188,9 +189,10 @@ def test_error_subclass_uses_parent_status(client, monkeypatch):
 def test_corrections_must_quote_the_learner(client, monkeypatch):
     def ask(instructions, messages):
         return TutorTurn(
+            analysis="Notes.",
             corrections=[
-                Correction(you_said="i GO there", better="I went there", explanation_pl="Czas przeszły."),
-                Correction(you_said="I has", better="I have", explanation_pl="Odmiana."),
+                Correction(you_said="i GO there", better="I went there", mistake_type="grammar", severity="important", explanation_pl="Czas przeszły."),
+                Correction(you_said="I has", better="I have", mistake_type="grammar", severity="important", explanation_pl="Odmiana."),
             ],
             reply="Nice?",
         )
@@ -249,7 +251,7 @@ def test_ask_maps_failures_to_llm_error(monkeypatch, result):
 
 
 def test_ask_sends_history_and_limits(monkeypatch):
-    turn = TutorTurn(corrections=[], reply="Hi?")
+    turn = TutorTurn(analysis="Notes.", corrections=[], reply="Hi?")
     client = FakeClient(Parsed(turn))
     monkeypatch.setattr(llm, "get_client", lambda: client)
 
