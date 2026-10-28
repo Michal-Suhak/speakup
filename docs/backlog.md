@@ -4,7 +4,7 @@ Ideas to consider after the MVP ([0001](specs/0001-mvp.md)) is done. Just a list
 
 To work on an item: discuss it, create a spec with the `feature-spec` skill, and remove the item from this list in the same PR (the spec takes over).
 
-The backlog changes only through PRs, like everything on `main`. New ideas can be collected and added together in one "Update backlog" PR. Items are written in English.
+The backlog changes only through PRs, like everything on `main`. New ideas can be collected and added together in one "Update backlog" PR.
 
 ## Ideas
 
