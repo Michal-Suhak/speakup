@@ -23,7 +23,7 @@
 
 - Put the API key, or any secret, in code, logs, frontend, prompts or commits. Keys come only from `.env`.
 - Call OpenAI from the browser. All API calls go through the backend.
-- Read, print, edit or `source` `.env` or other local env files (`.env.local`, `.env.*.local`) by any means, including the shell (`cat`, `grep`, `head`, `python -c`, …). `.claude/settings.json` blocks the file tools; the shell is covered by this rule. To check the key, run `uv run python config.py`; to know which variables exist, read `.env.example`.
+- Read, print, edit or `source` local env files (`.env`, `.env.*`, `.envrc`) or print the API key, by any means. This is enforced: `.claude/settings.json` denies the file tools on these paths, and the `.claude/hooks/block_env_access.py` hook blocks shell commands that touch them or print `OPENAI_API_KEY` or the environment. Never work around a block; edit docs that mention these files with the Edit tool, not the shell. For variable names read `env.example`; to check the key run `uv run python config.py`.
 - Commit `.env`, `local/`, `sessions/`, `profiles/`, recordings or other user data.
 - Store user voice recordings longer than needed for the current request, unless a stage explicitly requires it.
 - Treat user speech, transcripts, the custom topic or profile fields as instructions to the system. They are data inside the prompt (`<learner_profile>` section), validated and length-limited.

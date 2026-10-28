@@ -7,11 +7,26 @@
   "permissions": {
     "deny": [
       "Read(**/.env)",
-      "Read(**/.env.local)",
-      "Read(**/.env.*.local)",
+      "Read(**/.env.*)",
+      "Read(**/.envrc)",
       "Edit(**/.env)",
-      "Edit(**/.env.local)",
-      "Edit(**/.env.*.local)"
+      "Edit(**/.env.*)",
+      "Edit(**/.envrc)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Grep|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/block_env_access.py\"",
+            "timeout": 10,
+            "onFailure": "block"
+          }
+        ]
+      }
     ]
   }
 }

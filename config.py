@@ -22,7 +22,7 @@ if DEFAULT_LEVEL not in LEVELS:
 
 def require_api_key() -> str:
     if not OPENAI_API_KEY:
-        sys.exit("OPENAI_API_KEY is missing. Copy .env.example to .env and set your key.")
+        sys.exit("OPENAI_API_KEY is missing. Copy env.example to .env and set your key.")
     return OPENAI_API_KEY
 
 
