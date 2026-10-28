@@ -4,7 +4,7 @@
 
 - Simple and readable over clever. No abstractions without a second use case: no base classes with one subclass, no factories, no config for values that never change.
 - Fewest files that keep responsibilities clear. Follow the structure in `docs/specs/0001-mvp.md`.
-- Names, code, comments and log messages in English. Docs in `docs/` in English. User-facing UI text and README in Polish.
+- Names, code, comments and log messages in English. Docs in `docs/` and the README in English. User-facing UI text in Polish.
 - Match the surrounding code: naming, idioms, error handling.
 
 ## Comments
