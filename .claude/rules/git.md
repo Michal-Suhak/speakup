@@ -2,7 +2,8 @@
 
 ## General
 
-- Commit, push and open PRs only when the user asks. Never merge; the user reviews and merges.
+- Commit, push and open PRs only when the user asks.
+- Merge a PR only with the user's explicit permission for that PR ("merge PR #N"). Approval of one PR never covers another. Before merging, show the squash commit message and description (template below).
 - **No attribution in commits or PRs:** no `Co-Authored-By` trailer, no "Generated with Claude Code", no session links. The commit author is the user only.
 - Never commit `.env`, `local/`, `sessions/`, `profiles/`, `.venv/`, `__pycache__/` or audio files.
 - Check `git status` and the diff before committing.
@@ -21,6 +22,38 @@
 3. Commit, push the branch, open a PR to `main` with `gh pr create`, using `.github/pull_request_template.md`.
 4. Review fixes go as new commits on the same branch, no force-push after the PR is opened unless the user asks.
 5. PRs are always squash-merged, so the PR title becomes the single commit on `main`.
+6. After merging: delete the branch (`--delete-branch`), switch to `main` and pull.
+
+## Squash merge commit
+
+The commit on `main` describes the final state of the PR, not its history (no "fix review comments", no intermediate steps).
+
+```
+<PR title> (#<PR number>)
+
+- <Verb> <what changed> (<path or area>)
+- <Verb> <what changed> (<path or area>)
+```
+
+- **Subject**: the PR title plus `(#N)`, imperative, ≤ 72 characters.
+- **Description**: 2–6 bullets, one per meaningful change, each starting with an imperative verb (Add, Change, Fix, Remove), wrapped at 72 characters. Mention the spec number when the PR implements one.
+- No attribution, no links to sessions, no checklist, no "How to test".
+
+Example:
+
+```
+Add session history (0002) (#7)
+
+- Save finished sessions as JSON in sessions/ (tutor/history.py)
+- Add GET /api/history and a history screen in the start view
+- Update 0002 spec: stage 1 done, decision on file-per-session
+```
+
+Merge command:
+
+```bash
+gh pr merge <N> --squash --delete-branch --subject "<subject>" --body "<description>"
+```
 
 ## Branch names
 
