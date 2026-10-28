@@ -15,4 +15,4 @@ def invalid_profile_id(request: Request, error: InvalidProfileId) -> JSONRespons
 
 @app.exception_handler(BrokenProfile)
 def broken_profile(request: Request, error: BrokenProfile) -> JSONResponse:
-    return JSONResponse({"detail": f"{error} Fix or delete the file."}, status_code=500)
+    return JSONResponse({"detail": f"{error} Fix or delete the file."}, status_code=400)

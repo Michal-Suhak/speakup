@@ -101,5 +101,5 @@ def test_broken_file_is_skipped_and_reported(client, profiles_dir, file_name, co
     assert [p["id"] for p in client.get("/api/profiles").json()] == ["michal"]
 
     response = client.get(f"/api/profiles/{file_name.removesuffix('.json')}")
-    assert response.status_code == 500
+    assert response.status_code == 400
     assert "Fix or delete the file" in response.json()["detail"]
