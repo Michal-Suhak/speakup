@@ -18,7 +18,7 @@ Background: [docs/guidelines/07-evaluation-and-security.md](../../../docs/guidel
 
 - `PT-001` Reply is in English and 2–4 sentences.
 - `PT-002` Reply ends with a question or prompt to continue.
-- `PT-003` A clear mistake is recast with the correct form; small slips are ignored.
+- `PT-003` Corrections follow the profile `correction_style`: with `gentle` only important mistakes are recast and small slips are ignored, with `strict` every grammar and word-choice mistake is corrected.
 - `PT-004` No markdown, emoji, lists or brackets in the reply.
 - `PT-005` Vocabulary fits the selected level.
 - `PT-006` Tutor stays on topic but allows a natural digression.
@@ -27,7 +27,7 @@ Background: [docs/guidelines/07-evaluation-and-security.md](../../../docs/guidel
 
 ## Steps
 
-1. Prepare a few learner personas and scripted turns (B1 with past-tense errors, one-word answers, answers in Polish, an injection attempt).
+1. Prepare a few learner personas (at least one `gentle` and one `strict` profile) and scripted turns (B1 with past-tense errors, one-word answers, answers in Polish, an injection attempt).
 2. Ask the user before running: say how many API calls it will make.
 3. Run the turns, judge each check, print a table: check id, pass rate, failing examples.
 4. Compare with the previous run; report regressions first.

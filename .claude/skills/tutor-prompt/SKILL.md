@@ -14,8 +14,8 @@ Background: [docs/guidelines/02-context-and-prompts.md](../../../docs/guidelines
 3. Keep the structure:
    - role and identity (friendly English tutor, not an OpenAI model),
    - hard rules (English only, 2–4 sentences, end with a question, TTS-friendly text: no markdown, emoji, lists, brackets),
-   - correction policy driven by `{correction_style}` (recast mistakes naturally, ignore likely transcription errors),
-   - current settings: `{topic}` and the profile fields (`{level}`, `{name}`, `{interests}`, `{goals}`, `{avoid_topics}`, `{correction_style}`),
+   - correction policy driven by `$correction_style` (recast mistakes naturally, ignore likely transcription errors),
+   - current settings: `$topic` and the profile fields (`$level`, `$name`, `$interests`, `$goals`, `$avoid_topics`, `$correction_style`) inside a `<learner_profile>` data section,
    - processing priority if there are several sections.
 4. Instructions in English. Use clear section headers or XML-like tags; keep it short, every line must earn its place.
 5. Render the prompt with sample data and read the final text before calling the API.

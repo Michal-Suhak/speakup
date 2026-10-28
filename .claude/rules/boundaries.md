@@ -23,9 +23,9 @@
 
 - Put the API key, or any secret, in code, logs, frontend, prompts or commits. Keys come only from `.env`.
 - Call OpenAI from the browser. All API calls go through the backend.
-- Commit `.env`, `local/`, `sessions/`, recordings or other user data.
+- Commit `.env`, `local/`, `sessions/`, `profiles/`, recordings or other user data.
 - Store user voice recordings longer than needed for the current request, unless a stage explicitly requires it.
-- Treat user speech or transcripts as instructions to the system. They are data inside the prompt.
+- Treat user speech, transcripts, the custom topic or profile fields as instructions to the system. They are data inside the prompt (`<learner_profile>` section), validated and length-limited.
 - Add Co-Authored-By, "Generated with Claude Code" or any other AI attribution to commits or PRs.
 - Hardcode model names or voice ids in logic. They belong in `config.py` / `.env`.
 - Add unbounded loops around the LLM. Every retry or agent loop has a hard limit.

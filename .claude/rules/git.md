@@ -4,7 +4,7 @@
 
 - Commit, push and open PRs only when the user asks. Never merge; the user reviews and merges.
 - **No attribution in commits or PRs:** no `Co-Authored-By` trailer, no "Generated with Claude Code", no session links. The commit author is the user only.
-- Never commit `.env`, `local/`, `sessions/`, `.venv/`, `__pycache__/` or audio files.
+- Never commit `.env`, `local/`, `sessions/`, `profiles/`, `.venv/`, `__pycache__/` or audio files.
 - Check `git status` and the diff before committing.
 
 ## Small changes, small PRs

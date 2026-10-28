@@ -32,7 +32,7 @@
 ## Prompts
 
 - Prompt files in `prompts/`, English instructions, clear sections (role, rules, current settings).
-- Keep placeholders explicit (`{topic}`, `{level}`). Switch to Jinja2 only when conditional logic is really needed.
+- Placeholders use `$name` syntax rendered with `string.Template.substitute` (never `str.format`, which breaks on literal braces). Lists are joined with ", ", empty values render as "none". Switch to Jinja2 only when conditional logic is really needed.
 
 ## Tests
 

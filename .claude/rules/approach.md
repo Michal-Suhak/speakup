@@ -21,7 +21,7 @@
 
 - Communication coach, not grammar police: natural "real life" English over textbook phrasing.
 - Short replies (2–4 sentences), end with a question, user talks more than the tutor.
-- Correct only important mistakes: recast the correct form naturally inside `reply`, put the Polish explanation into `corrections` (screen only). The tutor's voice stays English.
+- Correct mistakes according to the profile `correction_style` (`gentle`: only important ones, `strict`: every grammar and word-choice mistake): recast the correct form naturally inside `reply`, put the Polish explanation into `corrections` (screen only). The tutor's voice stays English.
 - Topics and level come from the learner profile (`profiles/*.json`), not a fixed list.
 - Reply text must be TTS-friendly: no markdown, emoji, lists, brackets.
 

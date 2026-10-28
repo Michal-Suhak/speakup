@@ -11,12 +11,12 @@ Background: [docs/guidelines/05-openai-structured-output.md](../../../docs/guide
 
 1. Check current OpenAI docs (Context7: `openai` Python SDK) for the exact method, model names and parameters. Do not rely on memory.
 2. Keep one client per process, created from `config.py`. Key from `.env` only, fail fast if missing.
-3. Model names, voice and speed come from config, never hardcoded in the function.
+3. Model names and the TTS voice come from config, never hardcoded in the function. No per-session voice or speed in the MVP.
 4. Each wrapper is one small function with a clear signature:
    - `transcribe(audio_bytes, filename) -> str`
-   - `reply(history, user_text, settings) -> TutorTurn` (Pydantic: `reply`, `corrections`)
-   - `summarize(history) -> Summary` (Pydantic, structured output)
-   - `synthesize(text, voice, speed) -> bytes`
+   - `reply(session, user_text) -> TutorTurn` (Pydantic: `reply`, `corrections`)
+   - `summarize(session) -> Summary` (Pydantic, structured output, shape from the spec)
+   - `synthesize(text) -> bytes` (mp3, voice from config)
 5. Structured output: pass a Pydantic model, validate the result, retry a bounded number of times on validation failure.
 6. Errors: catch API/network errors at the wrapper or endpoint boundary and return a clear message to the frontend. No silent fallbacks that hide failures.
 7. Limits: set `max_tokens`/equivalent for chat, bounded retries, trim history before sending.
