@@ -10,6 +10,8 @@ from tutor.session import Message, Session
 PROMPTS_DIR = config.BASE_DIR / "prompts"
 # ponytail: plain sliding window; summarise older turns if long sessions lose context
 MAX_HISTORY_MESSAGES = 40
+REQUEST_TIMEOUT_SECONDS = 30
+MAX_OUTPUT_TOKENS = 2000
 START_INSTRUCTION = (
     "Start the session: greet the learner by name in one short sentence "
     "and ask your first question about the session topic."
@@ -59,7 +61,7 @@ def render_system_prompt(session: Session) -> str:
 def get_client() -> OpenAI:
     if not config.OPENAI_API_KEY:
         raise LLMUnavailable("OPENAI_API_KEY is missing. Copy env.example to .env, set your key and restart.")
-    return OpenAI(api_key=config.OPENAI_API_KEY)
+    return OpenAI(api_key=config.OPENAI_API_KEY, timeout=REQUEST_TIMEOUT_SECONDS, max_retries=1)
 
 
 def _ask(instructions: str, messages: list[Message]) -> TutorTurn:
@@ -69,6 +71,7 @@ def _ask(instructions: str, messages: list[Message]) -> TutorTurn:
             instructions=instructions,
             input=[{"role": m.role, "content": m.content} for m in messages],
             text_format=TutorTurn,
+            max_output_tokens=MAX_OUTPUT_TOKENS,
         )
     except APIError as error:
         raise LLMError(f"OpenAI request failed ({type(error).__name__}). Try again in a moment.") from error
@@ -91,5 +94,7 @@ def reply(session: Session, user_text: str) -> TutorTurn:
         message = Message("user", user_text)
         history = [*session.messages, message][-MAX_HISTORY_MESSAGES:]
         turn = _ask(render_system_prompt(session), history)
+        said = user_text.casefold()
+        turn.corrections = [c for c in turn.corrections if c.you_said.strip().casefold() in said]
         session.messages += [message, Message("assistant", turn.reply)]
         return turn

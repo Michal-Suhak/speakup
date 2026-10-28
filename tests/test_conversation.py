@@ -171,6 +171,94 @@ def test_llm_errors_are_readable(client, monkeypatch, error, status):
     response = start(client)
     assert response.status_code == status
     assert response.json() == {"detail": str(error)}
+    assert session._sessions == {}
+
+
+def test_error_subclass_uses_parent_status(client, monkeypatch):
+    class RateLimited(LLMError):
+        pass
+
+    def failing_ask(instructions, messages):
+        raise RateLimited("Too many requests.")
+
+    monkeypatch.setattr(llm, "_ask", failing_ask)
+    assert start(client).status_code == 502
+
+
+def test_corrections_must_quote_the_learner(client, monkeypatch):
+    def ask(instructions, messages):
+        return TutorTurn(
+            corrections=[
+                Correction(you_said="i GO there", better="I went there", explanation_pl="Czas przeszły."),
+                Correction(you_said="I has", better="I have", explanation_pl="Odmiana."),
+            ],
+            reply="Nice?",
+        )
+
+    monkeypatch.setattr(llm, "_ask", ask)
+    session_id = start(client).json()["session_id"]
+    corrections = client.post("/api/text", json={"session_id": session_id, "text": "I go there yesterday"}).json()[
+        "corrections"
+    ]
+    assert [c["you_said"] for c in corrections] == ["i GO there"]
+
+
+class FakeResponses:
+    def __init__(self, result):
+        self.result = result
+        self.kwargs = None
+
+    def parse(self, **kwargs):
+        self.kwargs = kwargs
+        if isinstance(self.result, Exception):
+            raise self.result
+        return self.result
+
+
+class FakeClient:
+    def __init__(self, result):
+        self.responses = FakeResponses(result)
+
+
+class Parsed:
+    def __init__(self, output_parsed):
+        self.output_parsed = output_parsed
+
+
+def api_error():
+    import httpx2
+    import openai
+
+    return openai.APIConnectionError(request=httpx2.Request("POST", "https://api.openai.com/v1/responses"))
+
+
+def validation_error():
+    from pydantic import ValidationError
+
+    try:
+        TutorTurn.model_validate({"reply": 1})
+    except ValidationError as error:
+        return error
+
+
+@pytest.mark.parametrize("result", [api_error(), validation_error(), Parsed(None)])
+def test_ask_maps_failures_to_llm_error(monkeypatch, result):
+    monkeypatch.setattr(llm, "get_client", lambda: FakeClient(result))
+    with pytest.raises(LLMError):
+        llm._ask("instructions", [Message("user", "Hi")])
+
+
+def test_ask_sends_history_and_limits(monkeypatch):
+    turn = TutorTurn(corrections=[], reply="Hi?")
+    client = FakeClient(Parsed(turn))
+    monkeypatch.setattr(llm, "get_client", lambda: client)
+
+    assert llm._ask("instructions", [Message("assistant", "Hello?"), Message("user", "Hi")]) == turn
+    sent = client.responses.kwargs
+    assert sent["instructions"] == "instructions"
+    assert sent["input"] == [{"role": "assistant", "content": "Hello?"}, {"role": "user", "content": "Hi"}]
+    assert sent["text_format"] is TutorTurn
+    assert sent["max_output_tokens"] == llm.MAX_OUTPUT_TOKENS
 
 
 def test_missing_key_raises_unavailable(monkeypatch):

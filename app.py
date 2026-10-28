@@ -21,7 +21,8 @@ ERROR_STATUS = {
 
 
 def _error_response(request: Request, error: Exception) -> JSONResponse:
-    return JSONResponse({"detail": str(error)}, status_code=ERROR_STATUS[type(error)])
+    status = next(code for error_type, code in ERROR_STATUS.items() if isinstance(error, error_type))
+    return JSONResponse({"detail": str(error)}, status_code=status)
 
 
 for error_type in ERROR_STATUS:

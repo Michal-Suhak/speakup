@@ -42,10 +42,9 @@ class Session:
 _sessions: dict[str, Session] = {}
 
 
-def create_session(profile: Profile, topic: str) -> Session:
-    session = Session(profile=profile, topic=topic)
+# ponytail: sessions live until the server stops; stage 4 removes them when a session ends
+def register_session(session: Session) -> None:
     _sessions[session.id] = session
-    return session
 
 
 def get_session(session_id: str) -> Session:

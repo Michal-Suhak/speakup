@@ -6,7 +6,7 @@ from pydantic import BaseModel, StringConstraints
 from tutor import llm
 from tutor.llm import TutorTurn
 from tutor.profiles import load_profile
-from tutor.session import create_session, get_session
+from tutor.session import Session, get_session, register_session
 
 router = APIRouter(prefix="/api", tags=["sessions"])
 
@@ -34,8 +34,9 @@ def start_session(request: StartRequest) -> StartResponse:
     profile = load_profile(request.profile_id)
     if profile is None:
         raise HTTPException(404, "Profile not found.")
-    session = create_session(profile, request.topic)
+    session = Session(profile=profile, topic=request.topic)
     turn = llm.start(session)
+    register_session(session)
     return StartResponse(session_id=session.id, reply=turn.reply)
 
 
