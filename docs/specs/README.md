@@ -4,8 +4,8 @@ Live documentation of the project. Every functional change starts with a documen
 
 ## How it works
 
-1. **Idea**: we discuss the change in a conversation with Claude.
-2. **Spec**: Claude creates the document with the `feature-spec` skill (from the [template](_template.md)) with status `draft` and adds it to the index below.
+1. **Idea**: collected in the [post-MVP backlog](../backlog.md) or raised in a conversation with Claude, then discussed.
+2. **Spec**: Claude creates the document with the `feature-spec` skill (from the [template](_template.md)) with status `draft`, adds it to the index below and removes the item from the backlog.
 3. **Acceptance**: we resolve the open questions. When none are left, the status changes to `accepted`.
 4. **Implementation**: status `in-progress`, the checklist in "Implementation plan" is ticked as work progresses. Every decision made along the way goes into "Decisions" and "Changelog".
 5. **Closing**: status `done` once the acceptance criteria are met.
