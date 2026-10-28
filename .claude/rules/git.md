@@ -19,10 +19,11 @@
 
 1. `main` only changes through PRs. Never commit directly to `main`.
 2. Branch from an up-to-date `main`, one branch per PR.
-3. Commit, push the branch, open a PR to `main` with `gh pr create`, using `.github/pull_request_template.md`.
-4. Review fixes go as new commits on the same branch, no force-push after the PR is opened unless the user asks.
-5. PRs are always squash-merged, so the PR title becomes the single commit on `main`.
-6. After merging: delete the branch (`--delete-branch`), switch to `main` and pull.
+3. Commit the work on the branch, then run `/code-review` on the branch diff (`main...HEAD`). Fix the findings with new commits, or explain in "Open points" why one is left as is. Never open a PR without this review.
+4. Push the branch and open a PR to `main` with `gh pr create`, using `.github/pull_request_template.md`.
+5. Review fixes go as new commits on the same branch, no force-push after the PR is opened unless the user asks.
+6. PRs are always squash-merged, so the PR title becomes the single commit on `main`.
+7. After merging: delete the branch (`--delete-branch`), switch to `main` and pull.
 
 ## Squash merge commit
 
