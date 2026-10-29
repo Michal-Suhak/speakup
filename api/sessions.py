@@ -105,7 +105,7 @@ def voice_turn(session_id: Annotated[str, Form()], audio: UploadFile) -> VoiceTu
     session = get_session(session_id)
     with session.turn():
         data = audio.file.read(stt.MAX_AUDIO_BYTES + 1)
-        user_text = stt.transcribe(data, audio.filename or "", session.usage)
+        user_text = stt.transcribe(data, audio.filename or "", session.usage, session.profile.speech_language)
         turn = llm.reply(session, user_text)
         reply_audio = speak(session, turn.reply)
     return VoiceTurnResponse(user_text=user_text, **_turn_fields(turn), audio=reply_audio)

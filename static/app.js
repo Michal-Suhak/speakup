@@ -145,6 +145,7 @@ function openEditor() {
   form.goals.value = current.goals;
   form.avoid_topics.value = current.avoid_topics.join(", ");
   form.correction_style.value = current.correction_style;
+  form.speech_language.value = current.speech_language;
   show("profile-view");
 }
 
@@ -159,6 +160,7 @@ async function saveProfile(event) {
     goals: form.goals.value,
     avoid_topics: splitList(form.avoid_topics.value),
     correction_style: form.correction_style.value,
+    speech_language: form.speech_language.value,
   };
   await api("PUT", `/api/profiles/${profile.id}`, profile);
   await loadProfiles(profile.id);
