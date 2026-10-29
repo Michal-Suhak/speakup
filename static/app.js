@@ -221,7 +221,7 @@ function setBusy(value) {
   $("mic").disabled = busy || speaking;
   $("repeat").disabled = busy || speaking;
   $("text-form").querySelectorAll("input, button").forEach((el) => (el.disabled = busy));
-  document.querySelectorAll("#start-view button, #end-session").forEach((el) => (el.disabled = busy));
+  document.querySelectorAll("#start-view button, #end-session, #new-session").forEach((el) => (el.disabled = busy));
 }
 
 function setSpeaking(value) {
@@ -304,6 +304,20 @@ async function endSession() {
     showSummary(data);
   } finally {
     setBusy(false);
+  }
+}
+
+async function leaveSession() {
+  releaseMicrophone();
+  stopSpeaking();
+  const id = sessionId;
+  sessionId = null;
+  show("start-view");
+  try {
+    await api("POST", `/api/session/${id}/end?summary=false`);
+  } catch (error) {
+    // the server no longer has it (restart), so there is nothing left to count
+    if (error.status !== 404) throw error;
   }
 }
 
@@ -425,12 +439,10 @@ $("start-form").onsubmit = guarded((event) => {
   return startSession($("topic").value.trim());
 });
 $("text-form").onsubmit = guarded(sendText);
-$("new-session").onclick = () => {
-  releaseMicrophone();
-  stopSpeaking();
-  sessionId = null;
-  show("start-view");
-};
+$("new-session").onclick = guarded(leaveSession);
+window.addEventListener("pagehide", () => {
+  if (sessionId) navigator.sendBeacon(`/api/session/${sessionId}/end?summary=false`);
+});
 $("end-session").onclick = guarded(endSession);
 $("summary-new").onclick = () => show("start-view");
 $("repeat").onclick = guarded(playReply);
