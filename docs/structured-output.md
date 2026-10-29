@@ -55,6 +55,10 @@ Public response of `POST /api/text` (unchanged from the spec):
 }
 ```
 
+## API models
+
+Request and response models in `api/` (and `Profile`, which is also the API body) are never sent to the LLM; their descriptions only document the API at `/docs`. Keep them short: one line per field and a realistic `examples` value where it helps; a class docstring says what the model is for.
+
 ## Adding a new model
 
 - Put it in `tutor/schemas.py` and follow the rules above.

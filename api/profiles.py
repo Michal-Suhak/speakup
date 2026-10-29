@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from tutor.profiles import Profile, list_profiles, load_profile, save_profile
 
@@ -7,9 +7,11 @@ router = APIRouter(prefix="/api/profiles", tags=["profiles"])
 
 
 class ProfileSummary(BaseModel):
-    id: str
-    name: str
-    level: str
+    """A profile in the start screen list."""
+
+    id: str = Field(examples=["michal"])
+    name: str = Field(examples=["Michał"])
+    level: str = Field(description="CEFR level.", examples=["B1"])
 
 
 @router.get("")

@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, StringConstraints
+from pydantic import BaseModel, Field, StringConstraints
 
 from tutor import llm
 from tutor.profiles import load_profile
@@ -14,29 +14,39 @@ UserText = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1,
 
 
 class StartRequest(BaseModel):
-    profile_id: str
-    topic: Topic
+    """Start a session: the tutor greets the learner and asks the first question."""
+
+    profile_id: str = Field(examples=["michal"])
+    topic: Topic = Field(description="Topic of the conversation, 1-80 characters.", examples=["Travel"])
 
 
 class StartResponse(BaseModel):
-    session_id: str
-    reply: str
+    session_id: str = Field(description="Send it with every message of this session.")
+    reply: str = Field(description="The tutor's greeting, in English.", examples=["Hi Michał! Where did you travel last?"])
 
 
 class TextRequest(BaseModel):
+    """One learner message in a running session."""
+
     session_id: str
-    text: UserText
+    text: UserText = Field(description="The learner's message, 1-1000 characters.", examples=["I go to Spain last summer."])
 
 
 class CorrectionOut(BaseModel):
-    you_said: str
-    better: str
-    explanation_pl: str
+    """One mistake from the learner's message."""
+
+    you_said: str = Field(description="Fragment of the learner's message with the mistake.", examples=["I go to Spain"])
+    better: str = Field(description="The corrected fragment.", examples=["I went to Spain"])
+    explanation_pl: str = Field(
+        description="Short explanation in Polish.", examples=["Mówimy o przeszłości, więc używamy formy „went”."]
+    )
 
 
 class TurnResponse(BaseModel):
-    reply: str
-    corrections: list[CorrectionOut]
+    """The tutor's answer to one learner message."""
+
+    reply: str = Field(description="What the tutor says, in English.", examples=["Oh, you went to Spain? Nice! What did you see?"])
+    corrections: list[CorrectionOut] = Field(description="Mistakes to show the learner; may be empty.")
 
 
 @router.post("/session")

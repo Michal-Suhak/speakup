@@ -36,13 +36,24 @@ class BrokenProfile(Exception):
 
 
 class Profile(BaseModel):
-    id: Annotated[str, StringConstraints(pattern=ID_PATTERN)]
-    name: Name
-    level: Literal[LEVELS] = DEFAULT_LEVEL
-    interests: list[Item] = Field(default_factory=lambda: list(DEFAULT_INTERESTS), max_length=20)
-    goals: Text = ""
-    avoid_topics: list[Item] = Field(default_factory=list, max_length=20)
-    correction_style: Literal["gentle", "strict"] = "gentle"
+    """A learner's profile, stored in profiles/<id>.json."""
+
+    id: Annotated[str, StringConstraints(pattern=ID_PATTERN)] = Field(
+        description="File name: 1-32 lowercase letters, digits or hyphens.", examples=["michal"]
+    )
+    name: Name = Field(description="Name the tutor uses.", examples=["Michał"])
+    level: Literal[LEVELS] = Field(DEFAULT_LEVEL, description="CEFR level.")
+    interests: list[Item] = Field(
+        default_factory=lambda: list(DEFAULT_INTERESTS),
+        max_length=20,
+        description="Topics offered on the start screen.",
+        examples=[["Travel", "Football"]],
+    )
+    goals: Text = Field("", description="What the learner wants to achieve.", examples=["Speak in meetings at work"])
+    avoid_topics: list[Item] = Field(default_factory=list, max_length=20, description="Topics the tutor never raises.")
+    correction_style: Literal["gentle", "strict"] = Field(
+        "gentle", description="gentle: only important mistakes; strict: every mistake."
+    )
 
 
 def _path(profile_id: str) -> Path:
