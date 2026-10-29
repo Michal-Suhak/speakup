@@ -1,3 +1,4 @@
+import json
 import logging
 from types import SimpleNamespace as obj
 
@@ -25,8 +26,8 @@ def test_cost_uses_config_rates(monkeypatch):
 
 def test_chat_usage_and_timing_are_recorded(monkeypatch, caplog):
     turn = TutorTurn(analysis="", corrections=[], reply="Hi?")
-    response = obj(output_parsed=turn, usage=obj(input_tokens=120, output_tokens=30))
-    responses = obj(parse=lambda **kwargs: response)
+    raw = obj(text=json.dumps({"usage": {"input_tokens": 120, "output_tokens": 30}}), parse=lambda: obj(output_parsed=turn))
+    responses = obj(with_raw_response=obj(parse=lambda **kwargs: raw))
     monkeypatch.setattr(llm, "get_client", lambda: obj(responses=responses))
     usage = Usage()
 
@@ -35,7 +36,7 @@ def test_chat_usage_and_timing_are_recorded(monkeypatch, caplog):
         llm._ask("instructions", [Message("user", "Hi")], usage)
 
     assert (usage.chat_input_tokens, usage.chat_output_tokens) == (240, 60)
-    assert "LLM took" in caplog.text and config.CHAT_MODEL in caplog.text
+    assert [(r.name, r.getMessage().split(" took")[0]) for r in caplog.records] == [("tutor.llm", "LLM")] * 2
 
 
 @pytest.mark.parametrize(
@@ -46,21 +47,26 @@ def test_chat_usage_and_timing_are_recorded(monkeypatch, caplog):
         (None, (0, 0)),
     ],
 )
-def test_stt_usage(monkeypatch, reported, expected):
+def test_stt_usage(monkeypatch, caplog, reported, expected):
     transcriptions = obj(create=lambda **kwargs: obj(text="Hello", usage=reported))
     monkeypatch.setattr(stt, "get_client", lambda: obj(audio=obj(transcriptions=transcriptions)))
     usage = Usage()
 
-    stt.transcribe(b"x" * 2000, "turn.webm", usage)
+    with caplog.at_level(logging.INFO, logger="tutor"):
+        stt.transcribe(b"x" * 2000, "turn.webm", usage)
+
+    assert caplog.records[0].name == "tutor.stt"
 
     assert (usage.stt_input_tokens, usage.stt_output_tokens) == expected
 
 
-def test_tts_counts_characters_only_when_it_works(speech):
+def test_tts_counts_characters_only_when_it_works(speech, caplog):
     import openai
 
     usage = Usage()
-    tts.synthesize("Hello there", "B1", usage)
+    with caplog.at_level(logging.INFO, logger="tutor"):
+        tts.synthesize("Hello there", "B1", usage)
+    assert caplog.records[0].name == "tutor.tts"
     speech.error = openai.OpenAIError("down")
     tts.synthesize("Not spoken", "B1", usage)
 

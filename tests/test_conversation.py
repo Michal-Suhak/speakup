@@ -1,4 +1,7 @@
+import json
 import threading
+
+import openai
 
 import pytest
 from fastapi.testclient import TestClient
@@ -206,16 +209,30 @@ def test_corrections_must_quote_the_learner(client, monkeypatch):
     assert [c["you_said"] for c in corrections] == ["i GO there"]
 
 
+class RawResponse:
+    """What `responses.with_raw_response.parse` returns: the body first, validation on `parse()`."""
+
+    def __init__(self, result, usage=None):
+        self.result = result
+        self.text = json.dumps({"usage": usage})
+
+    def parse(self):
+        if isinstance(self.result, Exception):
+            raise self.result
+        return self.result
+
+
 class FakeResponses:
     def __init__(self, result):
         self.result = result
         self.kwargs = None
+        self.with_raw_response = self
 
     def parse(self, **kwargs):
         self.kwargs = kwargs
-        if isinstance(self.result, Exception):
+        if isinstance(self.result, openai.OpenAIError):
             raise self.result
-        return self.result
+        return RawResponse(self.result)
 
 
 class FakeClient:
@@ -224,9 +241,8 @@ class FakeClient:
 
 
 class Parsed:
-    def __init__(self, output_parsed, usage=None):
+    def __init__(self, output_parsed):
         self.output_parsed = output_parsed
-        self.usage = usage
 
 
 def api_error():

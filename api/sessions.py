@@ -64,7 +64,7 @@ class VoiceTurnResponse(TurnResponse):
 
 
 class EndResponse(BaseModel):
-    summary: Summary | None = Field(description="Feedback on the session; null when the learner never answered.")
+    summary: Summary | None = Field(description="Feedback on the session; null when the learner never answered or no summary was asked for.")
     duration_seconds: int = Field(description="Time from the start of the session to its end.")
     usage: dict[str, int] = Field(description="Tokens and characters used by the session, including the summary.")
     cost_usd: float = Field(description="Approximate cost of the session in USD, from the rates in config.py.")
@@ -86,15 +86,18 @@ def start_session(request: StartRequest) -> StartResponse:
         raise HTTPException(404, "Profile not found.")
     session = Session(profile=profile, topic=request.topic)
     turn = llm.start(session)
+    reply_audio = speak(session, turn.reply)
     register_session(session)
-    return StartResponse(session_id=session.id, reply=turn.reply, audio=speak(session, turn.reply))
+    return StartResponse(session_id=session.id, reply=turn.reply, audio=reply_audio)
 
 
 @router.post("/text")
 def text_turn(request: TextRequest) -> TurnResponse:
     session = get_session(request.session_id)
-    turn = llm.reply(session, request.text)
-    return TurnResponse(**_turn_fields(turn), audio=speak(session, turn.reply))
+    with session.turn():
+        turn = llm.reply(session, request.text)
+        reply_audio = speak(session, turn.reply)
+    return TurnResponse(**_turn_fields(turn), audio=reply_audio)
 
 
 @router.post("/turn")
@@ -104,18 +107,20 @@ def voice_turn(session_id: Annotated[str, Form()], audio: UploadFile) -> VoiceTu
         data = audio.file.read(stt.MAX_AUDIO_BYTES + 1)
         user_text = stt.transcribe(data, audio.filename or "", session.usage)
         turn = llm.reply(session, user_text)
-    return VoiceTurnResponse(user_text=user_text, **_turn_fields(turn), audio=speak(session, turn.reply))
+        reply_audio = speak(session, turn.reply)
+    return VoiceTurnResponse(user_text=user_text, **_turn_fields(turn), audio=reply_audio)
 
 
 @router.post("/session/{session_id}/end")
-def end_session(session_id: str) -> EndResponse:
+def end_session(session_id: str, summary: bool = True) -> EndResponse:
+    """End a session; with `summary=false` (leaving without feedback) it only reports usage and cost."""
     session = get_session(session_id)
     with session.turn():
-        summary = llm.summarize(session)
+        feedback = llm.summarize(session) if summary else None
         remove_session(session_id)
     log.info("Session %s ended: %.4f USD, %s", session.id, session.usage.cost_usd(), asdict(session.usage))
     return EndResponse(
-        summary=summary,
+        summary=feedback,
         duration_seconds=round(time.monotonic() - session.started),
         usage=asdict(session.usage),
         cost_usd=round(session.usage.cost_usd(), 6),

@@ -1,3 +1,4 @@
+import json
 import logging
 import time
 from contextlib import contextmanager
@@ -62,12 +63,12 @@ def render_summary_prompt(session: Session) -> str:
 
 
 @contextmanager
-def timed(step: str, model: str) -> Iterator[None]:
+def timed(logger: logging.Logger, step: str, model: str) -> Iterator[None]:
     started = time.perf_counter()
     try:
         yield
     finally:
-        log.info("%s took %.2f s (%s)", step, time.perf_counter() - started, model)
+        logger.info("%s took %.2f s (%s)", step, time.perf_counter() - started, model)
 
 
 @lru_cache
@@ -80,21 +81,23 @@ def get_client() -> OpenAI:
 def _ask(instructions: str, messages: list[Message], usage: Usage, text_format: type[Answer] = TutorTurn) -> Answer:
     for _ in range(PARSE_ATTEMPTS):
         try:
-            with timed("LLM", config.CHAT_MODEL):
-                response = get_client().responses.parse(
+            with timed(log, "LLM", config.CHAT_MODEL):
+                raw = get_client().responses.with_raw_response.parse(
                     model=config.CHAT_MODEL,
                     instructions=instructions,
                     input=[{"role": m.role, "content": m.content} for m in messages],
                     text_format=text_format,
                     max_output_tokens=MAX_OUTPUT_TOKENS,
                 )
+            # read usage before parsing: an answer that fails validation is billed too
+            reported = json.loads(raw.text).get("usage") or {}
+            usage.chat_input_tokens += reported.get("input_tokens", 0)
+            usage.chat_output_tokens += reported.get("output_tokens", 0)
+            response = raw.parse()
         except OpenAIError as error:
             raise LLMError(f"OpenAI request failed ({type(error).__name__}). Try again in a moment.") from error
         except ValidationError:
             continue
-        if response.usage:
-            usage.chat_input_tokens += response.usage.input_tokens
-            usage.chat_output_tokens += response.usage.output_tokens
         if response.output_parsed is not None:
             return response.output_parsed
     raise LLMError("The tutor did not return a valid answer. Try again.")

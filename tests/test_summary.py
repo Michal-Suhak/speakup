@@ -78,6 +78,17 @@ def test_summary_drops_corrections_the_learner_never_said(client, session_id, ca
     assert [c["you_said"] for c in end(client, session_id).json()["summary"]["top_corrections"]] == ["I go"]
 
 
+def test_leaving_ends_the_session_without_a_summary(client, session_id, calls):
+    client.post("/api/text", json={"session_id": session_id, "text": "Hi"})
+    response = client.post(f"/api/session/{session_id}/end?summary=false")
+
+    assert response.status_code == 200
+    assert response.json()["summary"] is None
+    assert response.json()["cost_usd"] > 0
+    assert [text_format for *_, text_format in calls] == [TutorTurn, TutorTurn]
+    assert end(client, session_id).status_code == 404
+
+
 def test_session_without_answers_has_no_summary(client, session_id, calls):
     response = end(client, session_id)
 

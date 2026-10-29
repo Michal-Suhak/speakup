@@ -1,3 +1,6 @@
+import json
+from types import SimpleNamespace
+
 import pytest
 from pydantic import ValidationError
 
@@ -79,15 +82,19 @@ def test_ask_retries_once_after_invalid_output(monkeypatch):
     except ValidationError as error:
         invalid = error
 
-    results = [invalid, type("Parsed", (), {"output_parsed": turn, "usage": None})()]
+    results = [invalid, SimpleNamespace(output_parsed=turn)]
 
-    class Responses:
-        def parse(self, **kwargs):
-            result = results.pop(0)
-            if isinstance(result, Exception):
-                raise result
-            return result
+    def parse():
+        result = results.pop(0)
+        if isinstance(result, Exception):
+            raise result
+        return result
 
-    monkeypatch.setattr(llm, "get_client", lambda: type("Client", (), {"responses": Responses()})())
-    assert llm._ask("instructions", [], Usage()) == turn
+    raw = SimpleNamespace(text=json.dumps({"usage": {"input_tokens": 100, "output_tokens": 20}}), parse=parse)
+    responses = SimpleNamespace(parse=lambda **kwargs: raw)
+    monkeypatch.setattr(llm, "get_client", lambda: SimpleNamespace(responses=SimpleNamespace(with_raw_response=responses)))
+    usage = Usage()
+
+    assert llm._ask("instructions", [], usage) == turn
     assert results == []
+    assert (usage.chat_input_tokens, usage.chat_output_tokens) == (200, 40)

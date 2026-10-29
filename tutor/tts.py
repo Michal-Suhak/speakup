@@ -14,7 +14,7 @@ def synthesize(text: str, level: str, usage: Usage) -> bytes | None:
     """The reply as mp3, or None when TTS fails, so the turn still returns its text."""
     instructions = Template((PROMPTS_DIR / "speak.md").read_text(encoding="utf-8")).substitute(level=level)
     try:
-        with timed("TTS", config.TTS_MODEL):
+        with timed(log, "TTS", config.TTS_MODEL):
             speech = get_client().audio.speech.create(
                 model=config.TTS_MODEL,
                 voice=config.TTS_VOICE,

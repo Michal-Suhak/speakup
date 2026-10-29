@@ -1,9 +1,12 @@
+import logging
+
 from openai import OpenAIError
 
 import config
 from tutor.llm import PROMPTS_DIR, LLMError, get_client, timed
 from tutor.session import Usage
 
+log = logging.getLogger(__name__)
 MIN_AUDIO_BYTES = 1000
 MAX_AUDIO_BYTES = 25 * 1024 * 1024
 MAX_TRANSCRIPT_CHARS = 1000
@@ -32,7 +35,7 @@ def transcribe(audio: bytes, filename: str, usage: Usage) -> str:
     if len(audio) > MAX_AUDIO_BYTES:
         raise RecordingTooLong("The recording is too long. Speak in shorter parts.")
     try:
-        with timed("STT", config.STT_MODEL):
+        with timed(log, "STT", config.STT_MODEL):
             transcription = get_client().audio.transcriptions.create(
                 model=config.STT_MODEL,
                 file=(f"turn.{extension}", audio, FORMATS[extension]),
