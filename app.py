@@ -1,18 +1,29 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from api import profiles
+from api import profiles, sessions
+from tutor.llm import LLMError, LLMUnavailable
 from tutor.profiles import BrokenProfile, InvalidProfileId
+from tutor.session import SessionBusy, SessionNotFound
 
 app = FastAPI(title="SpeakUp")
 app.include_router(profiles.router)
+app.include_router(sessions.router)
+
+ERROR_STATUS = {
+    InvalidProfileId: 400,
+    BrokenProfile: 400,
+    SessionNotFound: 404,
+    SessionBusy: 409,
+    LLMError: 502,
+    LLMUnavailable: 503,
+}
 
 
-@app.exception_handler(InvalidProfileId)
-def invalid_profile_id(request: Request, error: InvalidProfileId) -> JSONResponse:
-    return JSONResponse({"detail": str(error)}, status_code=400)
+def _error_response(request: Request, error: Exception) -> JSONResponse:
+    status = next(code for error_type, code in ERROR_STATUS.items() if isinstance(error, error_type))
+    return JSONResponse({"detail": str(error)}, status_code=status)
 
 
-@app.exception_handler(BrokenProfile)
-def broken_profile(request: Request, error: BrokenProfile) -> JSONResponse:
-    return JSONResponse({"detail": f"{error} Fix or delete the file."}, status_code=400)
+for error_type in ERROR_STATUS:
+    app.add_exception_handler(error_type, _error_response)

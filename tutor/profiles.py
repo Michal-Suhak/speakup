@@ -36,13 +36,24 @@ class BrokenProfile(Exception):
 
 
 class Profile(BaseModel):
-    id: Annotated[str, StringConstraints(pattern=ID_PATTERN)]
-    name: Name
-    level: Literal[LEVELS] = DEFAULT_LEVEL
-    interests: list[Item] = Field(default_factory=lambda: list(DEFAULT_INTERESTS), max_length=20)
-    goals: Text = ""
-    avoid_topics: list[Item] = Field(default_factory=list, max_length=20)
-    correction_style: Literal["gentle", "strict"] = "gentle"
+    """A learner's profile, stored in profiles/<id>.json."""
+
+    id: Annotated[str, StringConstraints(pattern=ID_PATTERN)] = Field(
+        description="File name: 1-32 lowercase letters, digits or hyphens.", examples=["michal"]
+    )
+    name: Name = Field(description="Name the tutor uses.", examples=["Michał"])
+    level: Literal[LEVELS] = Field(DEFAULT_LEVEL, description="CEFR level.")
+    interests: list[Item] = Field(
+        default_factory=lambda: list(DEFAULT_INTERESTS),
+        max_length=20,
+        description="Topics offered on the start screen.",
+        examples=[["Travel", "Football"]],
+    )
+    goals: Text = Field("", description="What the learner wants to achieve.", examples=["Speak in meetings at work"])
+    avoid_topics: list[Item] = Field(default_factory=list, max_length=20, description="Topics the tutor never raises.")
+    correction_style: Literal["gentle", "strict"] = Field(
+        "gentle", description="gentle: only important mistakes; strict: every mistake."
+    )
 
 
 def _path(profile_id: str) -> Path:
@@ -55,9 +66,13 @@ def _read(path: Path) -> Profile:
     try:
         profile = Profile.model_validate_json(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeDecodeError, ValidationError) as error:
-        raise BrokenProfile(f"profiles/{path.name} is not a valid profile ({type(error).__name__}).") from None
+        raise BrokenProfile(
+            f"profiles/{path.name} is not a valid profile ({type(error).__name__}). Fix or delete the file."
+        ) from None
     if profile.id != path.stem:
-        raise BrokenProfile(f"profiles/{path.name} contains id {profile.id!r}; the id must match the file name.")
+        raise BrokenProfile(
+            f"profiles/{path.name} contains id {profile.id!r}; the id must match the file name. Fix or delete the file."
+        )
     return profile
 
 
