@@ -22,6 +22,7 @@
 ## Never
 
 - Put the API key, or any secret, in code, logs, frontend, prompts or commits. Keys come only from `.env`.
+- Put information that could leak (secrets, learner data, prompts, raw provider errors) into logs, error messages, HTTP error responses or PR/commit text. What is allowed is defined in `.claude/rules/code-style.md` → "Logs and error messages".
 - Call OpenAI from the browser. All API calls go through the backend.
 - Read, print, edit or `source` local env files (`.env`, `.env.*`, `.envrc`) or print the API key, by any means. This is enforced: `.claude/settings.json` denies the file tools on these paths, and the `.claude/hooks/block_env_access.py` hook blocks shell commands that touch them or print `OPENAI_API_KEY` or the environment. Never work around a block; edit docs that mention these files with the Edit tool, not the shell. For variable names read `env.example`; to check the key run `uv run python config.py`.
 - Commit `.env`, `local/`, `sessions/`, `profiles/`, recordings or other user data.

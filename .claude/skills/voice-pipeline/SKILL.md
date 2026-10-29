@@ -24,6 +24,8 @@ hold space / button → MediaRecorder → POST /api/turn (multipart) → STT →
 - STT may "fix" the learner's grammar. When corrections depend on the transcript, check that it keeps what was really said.
 - Measure latency per stage (STT, chat, TTS) before optimising. Quality first, then speed.
 
+- Never log or return transcripts, recordings or audio sizes tied to a learner in error messages; log durations, formats and error types only (see `.claude/rules/code-style.md` → "Logs and error messages").
+
 ## Check
 
 - Test in Chrome and Safari (webm and mp4 recordings): mic permission denied, no mic, network error, very short recording, long recording.
