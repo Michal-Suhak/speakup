@@ -1,4 +1,7 @@
+import json
 import threading
+
+import openai
 
 import pytest
 from fastapi.testclient import TestClient
@@ -8,7 +11,7 @@ from tutor import llm, profiles, session
 from tutor.llm import LLMError, LLMUnavailable
 from tutor.schemas import Correction, TutorTurn
 from tutor.profiles import Profile, save_profile
-from tutor.session import Message, Session
+from tutor.session import Message, Session, Usage
 
 
 @pytest.fixture(autouse=True)
@@ -31,7 +34,7 @@ def isolated(tmp_path, monkeypatch):
 def calls(monkeypatch):
     recorded = []
 
-    def fake_ask(instructions, messages):
+    def fake_ask(instructions, messages, *_):
         recorded.append((instructions, list(messages)))
         corrections = []
         if messages[-1].content == "I go there yesterday":
@@ -141,7 +144,7 @@ def test_invalid_text_is_422(client, calls, text):
 def test_parallel_turn_is_409(client, monkeypatch):
     entered, release = threading.Event(), threading.Event()
 
-    def slow_ask(instructions, messages):
+    def slow_ask(instructions, messages, *_):
         if len(messages) > 1:
             entered.set()
             release.wait(5)
@@ -166,7 +169,7 @@ def test_parallel_turn_is_409(client, monkeypatch):
     [(LLMError("OpenAI request failed."), 502), (LLMUnavailable("OPENAI_API_KEY is missing."), 503)],
 )
 def test_llm_errors_are_readable(client, monkeypatch, error, status):
-    def failing_ask(instructions, messages):
+    def failing_ask(instructions, messages, *_):
         raise error
 
     monkeypatch.setattr(llm, "_ask", failing_ask)
@@ -180,7 +183,7 @@ def test_error_subclass_uses_parent_status(client, monkeypatch):
     class RateLimited(LLMError):
         pass
 
-    def failing_ask(instructions, messages):
+    def failing_ask(instructions, messages, *_):
         raise RateLimited("Too many requests.")
 
     monkeypatch.setattr(llm, "_ask", failing_ask)
@@ -188,7 +191,7 @@ def test_error_subclass_uses_parent_status(client, monkeypatch):
 
 
 def test_corrections_must_quote_the_learner(client, monkeypatch):
-    def ask(instructions, messages):
+    def ask(instructions, messages, *_):
         return TutorTurn(
             analysis="Notes.",
             corrections=[
@@ -206,16 +209,30 @@ def test_corrections_must_quote_the_learner(client, monkeypatch):
     assert [c["you_said"] for c in corrections] == ["i GO there"]
 
 
+class RawResponse:
+    """What `responses.with_raw_response.parse` returns: the body first, validation on `parse()`."""
+
+    def __init__(self, result, usage=None):
+        self.result = result
+        self.text = json.dumps({"usage": usage})
+
+    def parse(self):
+        if isinstance(self.result, Exception):
+            raise self.result
+        return self.result
+
+
 class FakeResponses:
     def __init__(self, result):
         self.result = result
         self.kwargs = None
+        self.with_raw_response = self
 
     def parse(self, **kwargs):
         self.kwargs = kwargs
-        if isinstance(self.result, Exception):
+        if isinstance(self.result, openai.OpenAIError):
             raise self.result
-        return self.result
+        return RawResponse(self.result)
 
 
 class FakeClient:
@@ -254,7 +271,7 @@ def validation_error():
 def test_ask_maps_failures_to_llm_error(monkeypatch, result):
     monkeypatch.setattr(llm, "get_client", lambda: FakeClient(result))
     with pytest.raises(LLMError):
-        llm._ask("instructions", [Message("user", "Hi")])
+        llm._ask("instructions", [Message("user", "Hi")], Usage())
 
 
 def test_ask_sends_history_and_limits(monkeypatch):
@@ -262,7 +279,7 @@ def test_ask_sends_history_and_limits(monkeypatch):
     client = FakeClient(Parsed(turn))
     monkeypatch.setattr(llm, "get_client", lambda: client)
 
-    assert llm._ask("instructions", [Message("assistant", "Hello?"), Message("user", "Hi")]) == turn
+    assert llm._ask("instructions", [Message("assistant", "Hello?"), Message("user", "Hi")], Usage()) == turn
     sent = client.responses.kwargs
     assert sent["instructions"] == "instructions"
     assert sent["input"] == [{"role": "assistant", "content": "Hello?"}, {"role": "user", "content": "Hi"}]

@@ -1,4 +1,6 @@
 import base64
+import threading
+from types import SimpleNamespace
 
 import openai
 import pytest
@@ -15,7 +17,7 @@ def isolated(tmp_path, monkeypatch):
     monkeypatch.setattr(profiles, "PROFILES_DIR", tmp_path / "profiles")
     monkeypatch.setattr(session, "_sessions", {})
     save_profile(Profile(id="michal", name="Michał", level="A2"))
-    monkeypatch.setattr(llm, "_ask", lambda instructions, messages: TutorTurn(analysis="", corrections=[], reply="Hi there?"))
+    monkeypatch.setattr(llm, "_ask", lambda instructions, messages, *_: TutorTurn(analysis="", corrections=[], reply="Hi there?"))
 
 
 @pytest.fixture
@@ -33,6 +35,21 @@ def test_replies_come_with_audio(client, speech):
     assert sent["input"] == "Hi there?"
     assert "level A2" in sent["instructions"]
     assert "$" not in sent["instructions"]
+
+
+def test_session_stays_locked_while_the_reply_is_spoken(client, speech, monkeypatch):
+    session_id = client.post("/api/session", json={"profile_id": "michal", "topic": "Travel"}).json()["session_id"]
+    statuses = []
+
+    def end_from_another_client(**kwargs):
+        worker = threading.Thread(target=lambda: statuses.append(client.post(f"/api/session/{session_id}/end").status_code))
+        worker.start()
+        worker.join()
+        return SimpleNamespace(content=speech.content)
+
+    monkeypatch.setattr(speech, "create", end_from_another_client)
+    assert client.post("/api/text", json={"session_id": session_id, "text": "Hello"}).status_code == 200
+    assert statuses == [409]
 
 
 def test_tts_failure_keeps_the_text_reply(client, speech):

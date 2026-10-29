@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -9,6 +11,10 @@ from tutor.llm import LLMError, LLMUnavailable
 from tutor.profiles import BrokenProfile, InvalidProfileId
 from tutor.session import SessionBusy, SessionNotFound
 from tutor.stt import NoSpeech, RecordingTooLong, UnsupportedFormat
+
+logging.basicConfig(format="%(levelname)s:     %(name)s - %(message)s")
+for package in ("api", "tutor"):
+    logging.getLogger(package).setLevel(logging.INFO)
 
 app = FastAPI(title="SpeakUp")
 app.include_router(profiles.router)

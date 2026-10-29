@@ -1,6 +1,10 @@
+import json
+import logging
+import time
+from contextlib import contextmanager
 from functools import lru_cache
 from string import Template
-from typing import TypeVar
+from typing import Iterator, TypeVar
 
 from openai import OpenAI, OpenAIError
 from pydantic import ValidationError
@@ -9,8 +13,9 @@ import config
 from tutor.schemas import Correction, Summary, TutorTurn
 
 MAX_VISIBLE_CORRECTIONS = 3
-from tutor.session import Message, Session
+from tutor.session import Message, Session, Usage
 
+log = logging.getLogger(__name__)
 PROMPTS_DIR = config.BASE_DIR / "prompts"
 # ponytail: plain sliding window; summarise older turns if long sessions lose context
 MAX_HISTORY_MESSAGES = 40
@@ -57,6 +62,15 @@ def render_summary_prompt(session: Session) -> str:
     return template.substitute(name=profile.name, level=profile.level, topic=session.topic)
 
 
+@contextmanager
+def timed(logger: logging.Logger, step: str, model: str) -> Iterator[None]:
+    started = time.perf_counter()
+    try:
+        yield
+    finally:
+        logger.info("%s took %.2f s (%s)", step, time.perf_counter() - started, model)
+
+
 @lru_cache
 def get_client() -> OpenAI:
     if not config.OPENAI_API_KEY:
@@ -64,16 +78,22 @@ def get_client() -> OpenAI:
     return OpenAI(api_key=config.OPENAI_API_KEY, timeout=REQUEST_TIMEOUT_SECONDS, max_retries=1)
 
 
-def _ask(instructions: str, messages: list[Message], text_format: type[Answer] = TutorTurn) -> Answer:
+def _ask(instructions: str, messages: list[Message], usage: Usage, text_format: type[Answer] = TutorTurn) -> Answer:
     for _ in range(PARSE_ATTEMPTS):
         try:
-            response = get_client().responses.parse(
-                model=config.CHAT_MODEL,
-                instructions=instructions,
-                input=[{"role": m.role, "content": m.content} for m in messages],
-                text_format=text_format,
-                max_output_tokens=MAX_OUTPUT_TOKENS,
-            )
+            with timed(log, "LLM", config.CHAT_MODEL):
+                raw = get_client().responses.with_raw_response.parse(
+                    model=config.CHAT_MODEL,
+                    instructions=instructions,
+                    input=[{"role": m.role, "content": m.content} for m in messages],
+                    text_format=text_format,
+                    max_output_tokens=MAX_OUTPUT_TOKENS,
+                )
+            # read usage before parsing: an answer that fails validation is billed too
+            reported = json.loads(raw.text).get("usage") or {}
+            usage.chat_input_tokens += reported.get("input_tokens", 0)
+            usage.chat_output_tokens += reported.get("output_tokens", 0)
+            response = raw.parse()
         except OpenAIError as error:
             raise LLMError(f"OpenAI request failed ({type(error).__name__}). Try again in a moment.") from error
         except ValidationError:
@@ -96,7 +116,7 @@ def visible_corrections(turn: TutorTurn, user_text: str, correction_style: str) 
 
 def start(session: Session) -> TutorTurn:
     with session.turn():
-        turn = _ask(render_system_prompt(session), [Message("user", START_INSTRUCTION)])
+        turn = _ask(render_system_prompt(session), [Message("user", START_INSTRUCTION)], session.usage)
         turn.corrections = []
         session.messages.append(Message("assistant", turn.reply))
         return turn
@@ -106,7 +126,7 @@ def reply(session: Session, user_text: str) -> TutorTurn:
     with session.turn():
         message = Message("user", user_text)
         history = [*session.messages, message][-MAX_HISTORY_MESSAGES:]
-        turn = _ask(render_system_prompt(session), history)
+        turn = _ask(render_system_prompt(session), history, session.usage)
         turn.corrections = visible_corrections(turn, user_text, session.profile.correction_style)
         session.messages += [message, Message("assistant", turn.reply)]
         return turn
@@ -118,7 +138,7 @@ def summarize(session: Session) -> Summary | None:
         said = [m.content.casefold() for m in session.messages if m.role == "user"]
         if not said:
             return None
-        summary = _ask(render_summary_prompt(session), [*session.messages, Message("user", SUMMARY_INSTRUCTION)], Summary)
+        summary = _ask(render_summary_prompt(session), [*session.messages, Message("user", SUMMARY_INSTRUCTION)], session.usage, Summary)
         summary.top_corrections = [
             c for c in summary.top_corrections if any(c.you_said.strip().casefold() in text for text in said)
         ]

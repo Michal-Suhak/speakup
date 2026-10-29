@@ -18,7 +18,7 @@ def isolated(tmp_path, monkeypatch):
     monkeypatch.setattr(session, "_sessions", {})
     save_profile(Profile(id="michal", name="Michał", correction_style="strict"))
 
-    def fake_ask(instructions, messages):
+    def fake_ask(instructions, messages, *_):
         corrections = []
         if messages[-1].content == "I go there yesterday":
             corrections = [Correction(you_said="I go", better="I went", mistake_type="grammar", severity="important", explanation_pl="Czas przeszły.")]
