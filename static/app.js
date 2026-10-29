@@ -9,12 +9,26 @@ const TEXT = {
   noFreeId: "Nie udało się nadać id profilu, wpisz inne imię.",
   tutorName: "Tutor",
   corrections: (count) => `poprawki: ${count}`,
+  micIdle: "przytrzymaj i mów",
+  micRecording: "nagrywam… puść, aby wysłać",
+  tooShort: "Nagranie było za krótkie. Przytrzymaj przycisk przez cały czas, kiedy mówisz.",
+  noSpeech: "Nie usłyszałem, spróbuj jeszcze raz.",
+  recordingTooLong: "Nagranie jest za długie, mów krótszymi fragmentami.",
+  micDenied: "Brak dostępu do mikrofonu. Zezwól na niego w ustawieniach przeglądarki albo pisz w polu poniżej.",
+  noMic: "Nie znaleziono mikrofonu. Możesz pisać w polu poniżej.",
+  noRecorder: "Ta przeglądarka nie nagrywa dźwięku. Możesz pisać w polu poniżej.",
 };
+const MIN_RECORDING_MS = 500;
+const MAX_RECORDING_MS = 60_000;
 const views = ["start-view", "profile-view", "chat-view"];
 
 let profiles = [];
 let current = null;
 let sessionId = null;
+let busy = false;
+let stream = null;
+let recorder = null;
+let wantRecording = false;
 
 function show(view) {
   views.forEach((id) => ($(id).hidden = id !== view));
@@ -31,17 +45,20 @@ function errorMessage(path, status, detail) {
     return TEXT.invalidFields(fields);
   }
   if (status === 409) return TEXT.tutorBusy;
-  if (status === 404 && path === "/api/text") return TEXT.sessionExpired;
+  if (status === 404 && (path === "/api/text" || path === "/api/turn")) return TEXT.sessionExpired;
+  if (status === 400 && path === "/api/turn") return TEXT.noSpeech;
+  if (status === 413) return TEXT.recordingTooLong;
   return TEXT.httpError(status, detail);
 }
 
 async function api(method, path, body) {
   let response;
   try {
+    const json = body && !(body instanceof FormData);
     response = await fetch(path, {
       method,
-      headers: body ? { "Content-Type": "application/json" } : {},
-      body: body ? JSON.stringify(body) : undefined,
+      headers: json ? { "Content-Type": "application/json" } : {},
+      body: json ? JSON.stringify(body) : body,
     });
   } catch {
     throw new Error(TEXT.noConnection);
@@ -188,8 +205,10 @@ function addCorrections(message, corrections) {
   message.append(details);
 }
 
-function setBusy(busy) {
+function setBusy(value) {
+  busy = value;
   $("status").hidden = !busy;
+  $("mic").disabled = busy;
   $("text-form").querySelectorAll("input, button").forEach((el) => (el.disabled = busy));
   document.querySelectorAll("#start-view button").forEach((el) => (el.disabled = busy));
 }
@@ -205,7 +224,7 @@ async function startSession(topic) {
     addMessage("tutor", data.reply);
   } finally {
     setBusy(false);
-    $("text").focus();
+    $("mic").focus();
   }
 }
 
@@ -230,6 +249,68 @@ async function sendText(event) {
   }
 }
 
+function setRecording(recording) {
+  $("mic").classList.toggle("recording", recording);
+  $("mic-label").textContent = recording ? TEXT.micRecording : TEXT.micIdle;
+}
+
+async function startRecording() {
+  if (recorder || busy || wantRecording) return;
+  wantRecording = true;
+  if (!window.MediaRecorder) throw new Error(TEXT.noRecorder);
+  try {
+    stream ??= await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (error) {
+    wantRecording = false;
+    throw new Error(error.name === "NotFoundError" ? TEXT.noMic : TEXT.micDenied);
+  }
+  // the button may be released while the browser asks for microphone permission
+  if (!wantRecording) return;
+  const type = ["audio/webm", "audio/mp4"].find((t) => MediaRecorder.isTypeSupported(t));
+  const chunks = [];
+  const started = Date.now();
+  recorder = new MediaRecorder(stream, type ? { mimeType: type } : undefined);
+  recorder.ondataavailable = (event) => chunks.push(event.data);
+  recorder.onstop = guarded(() => sendRecording(chunks, recorder.mimeType, Date.now() - started));
+  recorder.start();
+  recorder.timer = setTimeout(stopRecording, MAX_RECORDING_MS);
+  setRecording(true);
+}
+
+function stopRecording() {
+  wantRecording = false;
+  if (!recorder) return;
+  clearTimeout(recorder.timer);
+  recorder.stop();
+  setRecording(false);
+}
+
+async function sendRecording(chunks, mimeType, duration) {
+  recorder = null;
+  if (duration < MIN_RECORDING_MS) throw new Error(TEXT.tooShort);
+  const form = new FormData();
+  form.append("session_id", sessionId);
+  form.append("audio", new Blob(chunks, { type: mimeType }), `turn.${mimeType.includes("mp4") ? "mp4" : "webm"}`);
+  setBusy(true);
+  try {
+    const data = await api("POST", "/api/turn", form);
+    addCorrections(addMessage("learner", data.user_text), data.corrections);
+    addMessage("tutor", data.reply);
+  } finally {
+    setBusy(false);
+  }
+}
+
+function releaseMicrophone() {
+  stopRecording();
+  stream?.getTracks().forEach((track) => track.stop());
+  stream = null;
+}
+
+function isTyping(event) {
+  return event.target.matches("input, textarea, select");
+}
+
 function guarded(handler) {
   return async (event) => {
     showError("");
@@ -252,8 +333,23 @@ $("start-form").onsubmit = guarded((event) => {
 });
 $("text-form").onsubmit = guarded(sendText);
 $("new-session").onclick = () => {
+  releaseMicrophone();
   sessionId = null;
   show("start-view");
 };
+$("mic").onpointerdown = guarded(startRecording);
+["pointerup", "pointerleave", "pointercancel"].forEach((name) => $("mic").addEventListener(name, stopRecording));
+document.addEventListener("keydown", (event) => {
+  if (event.code !== "Space" || $("chat-view").hidden || isTyping(event)) return;
+  event.preventDefault();
+  if (!event.repeat) guarded(startRecording)();
+});
+document.addEventListener("keyup", (event) => {
+  if (event.code !== "Space" || isTyping(event)) return;
+  event.preventDefault();
+  stopRecording();
+});
+window.addEventListener("blur", stopRecording);
+setRecording(false);
 
 guarded(loadProfiles)();

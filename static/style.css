@@ -225,7 +225,39 @@ details[open] summary { text-decoration: underline; }
 
 .status { color: var(--pencil); font-style: italic; margin: 0 0 calc(var(--line) / 2); }
 
-.answer { position: sticky; bottom: 0; padding: 12px 0; background: var(--paper); }
+.answer { position: sticky; bottom: 0; padding: 12px 0 4px; background: var(--paper); }
+
+.voice {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.mic {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 22px;
+  font: 600 16px/1 var(--mono);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.mic .dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--pen);
+}
+
+.mic.recording, .mic.recording:hover { background: var(--pen); }
+.mic.recording .dot { background: var(--paper); animation: pulse 1s ease-in-out infinite; }
+
+@keyframes pulse { 50% { opacity: 0.25; } }
+
+.hint { color: var(--pencil); font: italic 15px/var(--line) var(--serif); }
 
 .error {
   display: inline-block;
