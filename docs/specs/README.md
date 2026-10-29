@@ -31,4 +31,4 @@ Code never gets ahead of the document: if the implementation differs from the sp
 
 | No. | Document | Status | Description |
 |---|---|---|---|
-| 0001 | [MVP: voice English tutor](0001-mvp.md) | `in-progress` | STT → chat → TTS loop, profiles, corrections, session summary. |
+| 0001 | [MVP: voice English tutor](0001-mvp.md) | `done` | STT → chat → TTS loop, profiles, corrections, session summary. |
