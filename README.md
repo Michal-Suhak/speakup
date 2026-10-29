@@ -54,4 +54,4 @@ If everything works you will see `OK: key works`. Otherwise a message tells you 
 uv run uvicorn app:app --reload
 ```
 
-Open http://localhost:8000, create your profile, pick a topic and chat with the tutor in text. Voice comes in the next stages.
+Open http://localhost:8000, create your profile and pick a topic. Hold the button (or the space bar) while you speak, or type in the text field. The browser asks for microphone access the first time. The tutor answers in text for now; its voice comes in the next stage.
