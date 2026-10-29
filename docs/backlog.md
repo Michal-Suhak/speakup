@@ -22,7 +22,6 @@ The backlog changes only through PRs, like everything on `main`. New ideas can b
 - **Pronunciation assessment**
 - **Listening mode** – hide the tutor's text until the learner clicks, to practise understanding by ear.
 - **"Jak powiedzieć…?"** – ask in Polish how to say a word during the conversation, without leaving the topic.
-- **Polish translation of the tutor's reply** – a "przetłumacz" link under each tutor line, shown by default for A1–A2 and optional for higher levels. The translation comes in the same structured answer (e.g. `reply_pl`), so there is no extra call; it is shown only on click and never spoken.
 
 ## Voice and speed
 
