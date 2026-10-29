@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SpeakUp</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <h1>SpeakUp</h1>
+    <p id="error" class="error" hidden></p>
+
+    <section id="start-view">
+      <h2>Profil</h2>
+      <div id="profile-picker" class="row">
+        <select id="profile-select" aria-label="Profil"></select>
+        <button id="edit-profile" type="button">Edytuj profil</button>
+      </div>
+      <form id="new-profile" class="row">
+        <input id="new-name" placeholder="Imię nowego profilu" maxlength="40" required>
+        <button type="submit">Utwórz profil</button>
+      </form>
+
+      <div id="topic-box" hidden>
+        <h2>Temat</h2>
+        <div id="topics" class="topics"></div>
+        <form id="start-form" class="row">
+          <input id="topic" placeholder="Albo wpisz własny temat" maxlength="80" required>
+          <button type="submit">Start</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="profile-view" hidden>
+      <h2>Edytuj profil</h2>
+      <form id="profile-form">
+        <label>Imię <input name="name" maxlength="40" required></label>
+        <label>Poziom
+          <select name="level">
+            <option>A1</option><option>A2</option><option>B1</option>
+            <option>B2</option><option>C1</option><option>C2</option>
+          </select>
+        </label>
+        <label>Zainteresowania (po przecinku) <textarea name="interests" rows="2"></textarea></label>
+        <label>Cele <textarea name="goals" rows="3" maxlength="300"></textarea></label>
+        <label>Tematy do unikania (po przecinku) <textarea name="avoid_topics" rows="2"></textarea></label>
+        <label>Styl poprawek
+          <select name="correction_style">
+            <option value="gentle">Łagodny: tylko ważne błędy</option>
+            <option value="strict">Dokładny: każdy błąd</option>
+          </select>
+        </label>
+        <div class="row">
+          <button type="submit">Zapisz</button>
+          <button id="cancel-profile" type="button">Anuluj</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="chat-view" hidden>
+      <div class="row">
+        <h2 id="chat-topic"></h2>
+        <button id="new-session" type="button">Nowa rozmowa</button>
+      </div>
+      <div id="transcript" class="transcript"></div>
+      <p id="status" class="status" hidden>Tutor odpowiada…</p>
+      <form id="text-form" class="row">
+        <input id="text" placeholder="Napisz po angielsku" maxlength="1000" autocomplete="off" required>
+        <button type="submit">Wyślij</button>
+      </form>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
