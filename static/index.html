@@ -68,10 +68,16 @@
       </div>
       <div id="transcript" class="transcript"></div>
       <p id="status" class="status" hidden>tutor zastanawia się…</p>
-      <form id="text-form" class="row answer">
-        <input id="text" placeholder="napisz po angielsku" maxlength="1000" autocomplete="off" required>
-        <button type="submit">Wyślij</button>
-      </form>
+      <div class="answer">
+        <div class="voice">
+          <button id="mic" class="mic" type="button"><span class="dot"></span><span id="mic-label"></span></button>
+          <span class="hint">albo trzymaj spację</span>
+        </div>
+        <form id="text-form" class="row">
+          <input id="text" placeholder="albo napisz po angielsku" maxlength="1000" autocomplete="off" required>
+          <button type="submit" class="link">wyślij</button>
+        </form>
+      </div>
     </section>
   </main>
   <script src="app.js"></script>
