@@ -1,4 +1,5 @@
 import threading
+import time
 import uuid
 from contextlib import contextmanager
 from dataclasses import dataclass, field
@@ -27,6 +28,7 @@ class Session:
     topic: str
     id: str = field(default_factory=lambda: uuid.uuid4().hex)
     messages: list[Message] = field(default_factory=list)
+    started: float = field(default_factory=time.monotonic)
     # reentrant, so a voice turn can hold the lock through transcription and the reply in one request
     _lock: threading.RLock = field(default_factory=threading.RLock, repr=False)
 
@@ -43,7 +45,7 @@ class Session:
 _sessions: dict[str, Session] = {}
 
 
-# ponytail: sessions live until the server stops; stage 4 removes them when a session ends
+# ponytail: sessions that are never ended stay until the server stops
 def register_session(session: Session) -> None:
     _sessions[session.id] = session
 
@@ -53,3 +55,7 @@ def get_session(session_id: str) -> Session:
     if session is None:
         raise SessionNotFound("Session not found. Start a new session.")
     return session
+
+
+def remove_session(session_id: str) -> None:
+    _sessions.pop(session_id, None)

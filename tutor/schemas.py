@@ -72,3 +72,43 @@ class TutorTurn(BaseModel):
             "e.g. 'Oh, you went to Spain last summer? Nice!'."
         )
     )
+
+
+MAX_SUMMARY_ITEMS = 3
+
+
+class SummaryCorrection(BaseModel):
+    """One of the most important mistakes from the whole session."""
+
+    you_said: str = Field(description="The learner's words with the mistake, copied exactly from one of their messages.")
+    better: str = Field(description="The same words the way a native speaker would say them at the learner's level.")
+    explanation_pl: str = Field(description="One short sentence in Polish (at most 15 words) naming the rule.")
+
+
+class Vocabulary(BaseModel):
+    """A word or phrase worth learning, connected to what the learner talked about."""
+
+    word: str = Field(description="English word or short phrase that would have helped the learner in this conversation.")
+    meaning_pl: str = Field(description="Its meaning in Polish, a few words.")
+    example: str = Field(description="One short English sentence using it, about the session topic.")
+
+
+class Summary(BaseModel):
+    """Feedback for the learner after the session. Fill the fields in order."""
+
+    top_corrections: Annotated[list[SummaryCorrection], MaxLen(MAX_SUMMARY_ITEMS)] = Field(
+        description=(
+            f"At most {MAX_SUMMARY_ITEMS} mistakes that matter most: repeated ones and ones that change the meaning "
+            "first. Only mistakes the learner really made; empty list when there were none."
+        )
+    )
+    useful_vocabulary: Annotated[list[Vocabulary], MaxLen(MAX_SUMMARY_ITEMS)] = Field(
+        description=f"At most {MAX_SUMMARY_ITEMS} words or phrases at or slightly above the learner's level."
+    )
+    strengths: Annotated[list[str], MaxLen(MAX_SUMMARY_ITEMS)] = Field(
+        description=(
+            f"At most {MAX_SUMMARY_ITEMS} specific things the learner did well, each one short sentence in Polish, "
+            "e.g. 'Dobrze używasz czasu przeszłego w pytaniach.'"
+        )
+    )
+    tip_pl: str = Field(description="One concrete tip in Polish for the next session, one or two sentences.")
