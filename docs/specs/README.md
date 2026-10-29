@@ -32,4 +32,5 @@ Code never gets ahead of the document: if the implementation differs from the sp
 | No. | Document | Status | Description |
 |---|---|---|---|
 | 0001 | [MVP: voice English tutor](0001-mvp.md) | `done` | STT → chat → TTS loop, profiles, corrections, session summary. |
+| 0002 | [Listening aids: reply translation, slower repeat, English-only transcription](0002-listening-aids.md) | `accepted` | Polish translation under tutor lines, 0.75× replay, `language="en"` option in the profile. |
 | – | [Online deployment with accounts and spending limits](online-deployment.md) | `draft` | Neon database, per-profile login, monthly limits, admin commands, Cloud Run. |
