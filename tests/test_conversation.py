@@ -85,6 +85,7 @@ def test_start_and_text_turn(client, calls):
     assert turn.json() == {
         "corrections": [{"you_said": "I go", "better": "I went", "explanation_pl": "Czas przeszły."}],
         "reply": "Reply 2?",
+        "audio": "SUQzIGZha2UgbXAz",
     }
 
     _, history = calls[1]

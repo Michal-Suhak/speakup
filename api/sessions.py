@@ -1,10 +1,12 @@
+import base64
 from typing import Annotated
 
 from fastapi import APIRouter, Form, HTTPException, UploadFile
 from pydantic import BaseModel, Field, StringConstraints
 
-from tutor import llm, stt
+from tutor import llm, stt, tts
 from tutor.profiles import load_profile
+from tutor.schemas import TutorTurn
 from tutor.session import Session, get_session, register_session
 
 router = APIRouter(prefix="/api", tags=["sessions"])
@@ -23,6 +25,7 @@ class StartRequest(BaseModel):
 class StartResponse(BaseModel):
     session_id: str = Field(description="Send it with every message of this session.")
     reply: str = Field(description="The tutor's greeting, in English.", examples=["Hi Michał! Where did you travel last?"])
+    audio: str | None = Field(None, description="The reply as base64 mp3; missing when speech synthesis failed.")
 
 
 class TextRequest(BaseModel):
@@ -47,12 +50,22 @@ class TurnResponse(BaseModel):
 
     reply: str = Field(description="What the tutor says, in English.", examples=["Oh, you went to Spain? Nice! What did you see?"])
     corrections: list[CorrectionOut] = Field(description="Mistakes to show the learner; may be empty.")
+    audio: str | None = Field(None, description="The reply as base64 mp3; missing when speech synthesis failed.")
 
 
 class VoiceTurnResponse(TurnResponse):
     """The tutor's answer to one spoken learner message."""
 
     user_text: str = Field(description="What the learner said, as transcribed.", examples=["I go to Spain last summer."])
+
+
+def _turn_fields(turn: TutorTurn) -> dict:
+    return TurnResponse.model_validate(turn, from_attributes=True).model_dump(exclude={"audio"})
+
+
+def speak(session: Session, text: str) -> str | None:
+    audio = tts.synthesize(text, session.profile.level)
+    return base64.b64encode(audio).decode("ascii") if audio else None
 
 
 @router.post("/session")
@@ -63,13 +76,14 @@ def start_session(request: StartRequest) -> StartResponse:
     session = Session(profile=profile, topic=request.topic)
     turn = llm.start(session)
     register_session(session)
-    return StartResponse(session_id=session.id, reply=turn.reply)
+    return StartResponse(session_id=session.id, reply=turn.reply, audio=speak(session, turn.reply))
 
 
 @router.post("/text")
 def text_turn(request: TextRequest) -> TurnResponse:
-    turn = llm.reply(get_session(request.session_id), request.text)
-    return TurnResponse.model_validate(turn, from_attributes=True)
+    session = get_session(request.session_id)
+    turn = llm.reply(session, request.text)
+    return TurnResponse(**_turn_fields(turn), audio=speak(session, turn.reply))
 
 
 @router.post("/turn")
@@ -79,4 +93,4 @@ def voice_turn(session_id: Annotated[str, Form()], audio: UploadFile) -> VoiceTu
         data = audio.file.read(stt.MAX_AUDIO_BYTES + 1)
         user_text = stt.transcribe(data, audio.filename or "")
         turn = llm.reply(session, user_text)
-    return VoiceTurnResponse(user_text=user_text, **TurnResponse.model_validate(turn, from_attributes=True).model_dump())
+    return VoiceTurnResponse(user_text=user_text, **_turn_fields(turn), audio=speak(session, turn.reply))
