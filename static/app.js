@@ -230,13 +230,16 @@ async function playReply() {
   setSpeaking(true);
   try {
     await player.play();
-  } catch {
+  } catch (error) {
+    // a newer reply or "nowa rozmowa" interrupted this one and owns the state now
+    if (error.name === "AbortError") return;
     setSpeaking(false);
     showError(TEXT.playFailed);
   }
 }
 
 function speak(audio) {
+  if ($("chat-view").hidden) return;
   stopSpeaking();
   if (audio) player.src = `data:audio/mpeg;base64,${audio}`;
   else player.removeAttribute("src");

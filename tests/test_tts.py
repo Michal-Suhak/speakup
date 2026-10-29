@@ -5,7 +5,6 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app import app
-from tests.conftest import MP3
 from tutor import llm, profiles, session
 from tutor.profiles import Profile, save_profile
 from tutor.schemas import TutorTurn
@@ -28,8 +27,8 @@ def test_replies_come_with_audio(client, speech):
     started = client.post("/api/session", json={"profile_id": "michal", "topic": "Travel"}).json()
     answered = client.post("/api/text", json={"session_id": started["session_id"], "text": "Hello"}).json()
 
-    assert base64.b64decode(started["audio"]) == MP3
-    assert base64.b64decode(answered["audio"]) == MP3
+    assert base64.b64decode(started["audio"]) == speech.content
+    assert base64.b64decode(answered["audio"]) == speech.content
     sent = speech.calls[-1]
     assert sent["input"] == "Hi there?"
     assert "level A2" in sent["instructions"]
