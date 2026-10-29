@@ -7,7 +7,7 @@ MIN_AUDIO_BYTES = 1000
 MAX_AUDIO_BYTES = 25 * 1024 * 1024
 MAX_TRANSCRIPT_CHARS = 1000
 # the API detects the format from the file extension: webm comes from Chrome, mp4 from Safari
-FORMATS = {"webm", "mp4", "m4a", "ogg", "wav", "mp3"}
+FORMATS = {"webm": "audio/webm", "mp4": "audio/mp4", "m4a": "audio/mp4", "ogg": "audio/ogg", "wav": "audio/wav", "mp3": "audio/mpeg"}
 
 
 class NoSpeech(Exception):
@@ -22,7 +22,7 @@ class UnsupportedFormat(Exception):
     pass
 
 
-def transcribe(audio: bytes, filename: str, content_type: str) -> str:
+def transcribe(audio: bytes, filename: str) -> str:
     extension = filename.rpartition(".")[2].lower()
     if extension not in FORMATS:
         raise UnsupportedFormat(f"Unsupported recording format. Use one of: {', '.join(sorted(FORMATS))}.")
@@ -33,7 +33,7 @@ def transcribe(audio: bytes, filename: str, content_type: str) -> str:
     try:
         transcription = get_client().audio.transcriptions.create(
             model=config.STT_MODEL,
-            file=(f"turn.{extension}", audio, content_type),
+            file=(f"turn.{extension}", audio, FORMATS[extension]),
             prompt=(PROMPTS_DIR / "transcribe.md").read_text(encoding="utf-8").strip(),
         )
     except OpenAIError as error:

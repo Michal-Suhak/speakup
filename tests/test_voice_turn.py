@@ -77,8 +77,8 @@ def test_voice_turn(client, session_id, transcriptions):
 
 
 def test_safari_recording_keeps_mp4_extension(client, session_id, transcriptions):
-    assert turn(client, session_id, filename="recording.MP4", content_type="audio/mp4").status_code == 200
-    assert transcriptions.kwargs["file"][0] == "turn.mp4"
+    assert turn(client, session_id, filename="recording.MP4", content_type="text/html").status_code == 200
+    assert transcriptions.kwargs["file"] == ("turn.mp4", AUDIO, "audio/mp4")
 
 
 @pytest.mark.parametrize(

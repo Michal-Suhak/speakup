@@ -302,6 +302,7 @@ async function sendRecording(chunks, mimeType, duration) {
 }
 
 function releaseMicrophone() {
+  if (recorder) recorder.onstop = () => (recorder = null);
   stopRecording();
   stream?.getTracks().forEach((track) => track.stop());
   stream = null;
