@@ -39,6 +39,7 @@ Anything logged or returned in an error can leak (terminal history, screenshots,
 - Plain HTML/CSS/JS, no framework, no build step.
 - Small functions, `async/await` with `fetch`, visible UI states: listening / processing / speaking / error.
 - Show user-friendly messages for: no microphone, network error, empty or too short recording.
+- UI text used from JavaScript (messages, labels, templates) lives in the `TEXT` object at the top of `static/app.js`, never inline, so it can be translated or moved to another frontend in one place. Text in the markup stays in `index.html`.
 
 ## Prompts
 

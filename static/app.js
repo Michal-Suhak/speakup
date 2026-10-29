@@ -1,4 +1,15 @@
 const $ = (id) => document.getElementById(id);
+
+const TEXT = {
+  invalidFields: (fields) => `Nieprawidłowe dane w polach: ${fields}.`,
+  tutorBusy: "Tutor jeszcze odpowiada, poczekaj chwilę.",
+  sessionExpired: "Sesja wygasła (serwer był restartowany). Kliknij „nowa rozmowa”.",
+  httpError: (status, detail) => `Błąd (${status}): ${detail}`,
+  noConnection: "Brak połączenia z serwerem. Czy aplikacja jest uruchomiona?",
+  noFreeId: "Nie udało się nadać id profilu, wpisz inne imię.",
+  tutorName: "Tutor",
+  corrections: (count) => `poprawki: ${count}`,
+};
 const views = ["start-view", "profile-view", "chat-view"];
 
 let profiles = [];
@@ -17,11 +28,11 @@ function showError(message) {
 function errorMessage(path, status, detail) {
   if (status === 422 && Array.isArray(detail)) {
     const fields = detail.map((e) => e.loc.slice(1).join(".")).join(", ");
-    return `Nieprawidłowe dane w polach: ${fields}.`;
+    return TEXT.invalidFields(fields);
   }
-  if (status === 409) return "Tutor jeszcze odpowiada, poczekaj chwilę.";
-  if (status === 404 && path === "/api/text") return "Sesja wygasła (serwer był restartowany). Kliknij „Nowa rozmowa”.";
-  return `Błąd (${status}): ${detail}`;
+  if (status === 409) return TEXT.tutorBusy;
+  if (status === 404 && path === "/api/text") return TEXT.sessionExpired;
+  return TEXT.httpError(status, detail);
 }
 
 async function api(method, path, body) {
@@ -33,7 +44,7 @@ async function api(method, path, body) {
       body: body ? JSON.stringify(body) : undefined,
     });
   } catch {
-    throw new Error("Brak połączenia z serwerem. Czy aplikacja jest uruchomiona?");
+    throw new Error(TEXT.noConnection);
   }
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
@@ -68,7 +79,7 @@ async function freeId(name) {
       if (error.status !== 400) throw error;
     }
   }
-  throw new Error("Nie udało się nadać id profilu, wpisz inne imię.");
+  throw new Error(TEXT.noFreeId);
 }
 
 async function loadProfiles(selectId) {
@@ -145,7 +156,7 @@ function addMessage(role, text) {
   line.className = `line ${role}`;
   const who = document.createElement("span");
   who.className = "who";
-  who.textContent = role === "tutor" ? "Tutor" : current.name;
+  who.textContent = role === "tutor" ? TEXT.tutorName : current.name;
   const said = document.createElement("div");
   said.className = "said";
   said.textContent = text;
@@ -159,7 +170,7 @@ function addCorrections(message, corrections) {
   if (corrections.length === 0) return;
   const details = document.createElement("details");
   const summary = document.createElement("summary");
-  summary.textContent = `poprawki: ${corrections.length}`;
+  summary.textContent = TEXT.corrections(corrections.length);
   details.append(summary);
   for (const c of corrections) {
     const p = document.createElement("p");
