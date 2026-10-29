@@ -20,7 +20,8 @@ const TEXT = {
   thinking: "tutor zastanawia się…",
   speaking: "tutor mówi…",
   playFailed: "Nie udało się odtworzyć głosu tutora. Kliknij „powtórz”.",
-  duration: (minutes) => `czas rozmowy: ${minutes} min`,
+  sessionStats: (minutes, cost) =>
+    `czas rozmowy: ${minutes} min · koszt: ok. ${cost.toLocaleString("pl-PL", { style: "currency", currency: "USD", maximumSignificantDigits: 2 })}`,
 };
 const MIN_RECORDING_MS = 500;
 const MAX_RECORDING_MS = 60_000;
@@ -326,8 +327,8 @@ function fillSection(id, items, render) {
   $(id).parentElement.hidden = items.length === 0;
 }
 
-function showSummary({ summary, duration_seconds }) {
-  $("summary-duration").textContent = TEXT.duration(Math.max(1, Math.round(duration_seconds / 60)));
+function showSummary({ summary, duration_seconds, cost_usd }) {
+  $("summary-duration").textContent = TEXT.sessionStats(Math.max(1, Math.round(duration_seconds / 60)), cost_usd);
   $("summary-empty").hidden = Boolean(summary);
   $("summary-content").hidden = !summary;
   if (summary) {
