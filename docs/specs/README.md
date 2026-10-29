@@ -25,10 +25,11 @@ Code never gets ahead of the document: if the implementation differs from the sp
 
 ## Naming
 
-`NNNN-short-name.md`: next 4-digit number and a kebab-case name, e.g. `0002-session-history.md`. Numbers are never reused.
+`NNNN-short-name.md`: next 4-digit number and a kebab-case name, e.g. `0002-session-history.md`. Numbers are never reused. A draft parked for later can go without a number (`short-name.md`); it gets the next number when it is accepted.
 
 ## Index
 
 | No. | Document | Status | Description |
 |---|---|---|---|
 | 0001 | [MVP: voice English tutor](0001-mvp.md) | `done` | STT → chat → TTS loop, profiles, corrections, session summary. |
+| – | [Online deployment with accounts and spending limits](online-deployment.md) | `draft` | Neon database, per-profile login, monthly limits, admin commands, Cloud Run. |
