@@ -24,6 +24,16 @@
 - Handle errors at boundaries (endpoints, API calls): return a clear error to the frontend, do not swallow exceptions silently.
 - f-strings for code; prompt text lives in `prompts/`, not in Python strings.
 
+## Logs and error messages
+
+Anything logged or returned in an error can leak (terminal history, screenshots, issues, PRs), so it carries no sensitive data.
+
+- **Never include:** the API key or any secret, request headers, full prompts, learner messages or transcripts, profile field values, audio, raw OpenAI error bodies or `str(error)` of provider exceptions, `repr()` of whole models or sessions.
+- **Allowed:** ids, file names, error types (`type(error).__name__`), HTTP status codes, model names, durations, token and character counts.
+- Error messages for the frontend are written by us: short, actionable, in English, e.g. "OpenAI request failed (APITimeoutError). Try again in a moment." Never forward a library's message as is.
+- Chain the original exception (`raise ... from error`) instead of putting its text in the message; for pydantic errors, report the field name and error type, not the input value (`ValidationError` text contains the input).
+- When adding a log line, check it against this list as if it were posted publicly.
+
 ## Frontend
 
 - Plain HTML/CSS/JS, no framework, no build step.

@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from api import profiles, sessions
@@ -27,3 +28,10 @@ def _error_response(request: Request, error: Exception) -> JSONResponse:
 
 for error_type in ERROR_STATUS:
     app.add_exception_handler(error_type, _error_response)
+
+
+@app.exception_handler(RequestValidationError)
+def invalid_request(request: Request, error: RequestValidationError) -> JSONResponse:
+    # FastAPI's default 422 body echoes the submitted value, which may be a learner message or profile text
+    detail = [{"loc": e["loc"], "msg": e["msg"], "type": e["type"]} for e in error.errors()]
+    return JSONResponse({"detail": detail}, status_code=422)

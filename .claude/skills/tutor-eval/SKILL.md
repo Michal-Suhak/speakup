@@ -31,3 +31,4 @@ Background: [docs/guidelines/07-evaluation-and-security.md](../../../docs/guidel
 2. Ask the user before running: say how many API calls it will make.
 3. Run the turns, judge each check, print a table: check id, pass rate, failing examples.
 4. Compare with the previous run; report regressions first.
+5. Use made-up personas, never real profiles. Eval output (tables, saved conversations, logs) contains no real learner data, keys or full prompts; saved conversations stay in a gitignored folder.

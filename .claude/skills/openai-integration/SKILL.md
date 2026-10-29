@@ -20,7 +20,7 @@ Background: [docs/guidelines/05-openai-structured-output.md](../../../docs/guide
 5. Structured output: pass a Pydantic model, validate the result, retry a bounded number of times on validation failure.
 6. Errors: catch API/network errors at the wrapper or endpoint boundary and return a clear message to the frontend. No silent fallbacks that hide failures.
 7. Limits: set `max_tokens`/equivalent for chat, bounded retries, trim history before sending.
-8. Do not log full prompts with user data or the API key. Log model, latency and token usage instead.
+8. No sensitive data in logs or errors (see `.claude/rules/code-style.md` → "Logs and error messages"): never log prompts, learner text, profile values, headers or the key, and never pass `str(error)` of an OpenAI exception to the frontend. Log model, latency, token usage and the error type; write the user-facing message yourself.
 
 ## Check
 

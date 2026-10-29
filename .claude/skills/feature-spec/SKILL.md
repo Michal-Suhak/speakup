@@ -17,7 +17,7 @@ Specs in `docs/specs/` are the live documentation of SpeakUp. Process and status
    - in "Solution design" keep only the subsections the change touches,
    - give full JSON examples for any new or changed format,
    - "Decisions" lists real alternatives and the reason for the choice,
-   - "Cost, latency, privacy" is never empty when OpenAI calls or stored user data change,
+   - "Cost, latency, privacy" is never empty when OpenAI calls or stored user data change, and says what the feature logs and returns in errors (only ids, error types, counts; see `.claude/rules/code-style.md` → "Logs and error messages"),
    - "Implementation plan" uses small steps, each ending in something runnable,
    - "Acceptance criteria" are binary and checkable.
 5. Unknowns go to "Risks and open questions" as checkboxes, not into guesses in the design.

@@ -34,6 +34,8 @@ Background: [docs/guidelines/02-context-and-prompts.md](../../../docs/guidelines
 
 ## Do not
 
+- Do not print or log rendered prompts or sample turns built from a real profile; render with made-up profiles when checking the prompt.
+
 - Do not put prompt text into Python code.
 - Do not add rules that conflict with existing ones; replace instead of stacking.
 - Do not grow the prompt to fix one edge case without checking it does not break the others.
