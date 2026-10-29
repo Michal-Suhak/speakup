@@ -14,12 +14,13 @@ function showError(message) {
   $("error").hidden = !message;
 }
 
-function errorMessage(status, detail) {
+function errorMessage(path, status, detail) {
   if (status === 422 && Array.isArray(detail)) {
     const fields = detail.map((e) => e.loc.slice(1).join(".")).join(", ");
     return `Nieprawidłowe dane w polach: ${fields}.`;
   }
   if (status === 409) return "Tutor jeszcze odpowiada, poczekaj chwilę.";
+  if (status === 404 && path === "/api/text") return "Sesja wygasła (serwer był restartowany). Kliknij „Nowa rozmowa”.";
   return `Błąd (${status}): ${detail}`;
 }
 
@@ -35,7 +36,11 @@ async function api(method, path, body) {
     throw new Error("Brak połączenia z serwerem. Czy aplikacja jest uruchomiona?");
   }
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(errorMessage(response.status, data.detail ?? response.statusText));
+  if (!response.ok) {
+    const error = new Error(errorMessage(path, response.status, data.detail ?? response.statusText));
+    error.status = response.status;
+    throw error;
+  }
   return data;
 }
 
@@ -51,12 +56,19 @@ function slugify(name) {
   return slug || "profil";
 }
 
-function uniqueId(name) {
+async function freeId(name) {
   const base = slugify(name);
-  const taken = new Set(profiles.map((p) => p.id));
-  let id = base;
-  for (let n = 2; taken.has(id); n++) id = `${base}-${n}`;
-  return id;
+  for (let n = 1; n <= 100; n++) {
+    const id = n === 1 ? base : `${base}-${n}`;
+    try {
+      await api("GET", `/api/profiles/${id}`);
+    } catch (error) {
+      // 400 means a broken file with this id: keep it and pick another id
+      if (error.status === 404) return id;
+      if (error.status !== 400) throw error;
+    }
+  }
+  throw new Error("Nie udało się nadać id profilu, wpisz inne imię.");
 }
 
 async function loadProfiles(selectId) {
@@ -121,7 +133,7 @@ async function saveProfile(event) {
 async function createProfile(event) {
   event.preventDefault();
   const name = $("new-name").value.trim();
-  const id = uniqueId(name);
+  const id = await freeId(name);
   await api("PUT", `/api/profiles/${id}`, { id, name });
   $("new-name").value = "";
   await loadProfiles(id);
