@@ -69,6 +69,7 @@ def test_voice_turn(client, session_id, transcriptions):
         "user_text": "I go there yesterday",
         "reply": "Nice?",
         "corrections": [{"you_said": "I go", "better": "I went", "explanation_pl": "Czas przeszły."}],
+        "audio": "SUQzIGZha2UgbXAz",
     }
     sent = transcriptions.kwargs
     assert sent["file"] == ("turn.webm", AUDIO, "audio/webm")

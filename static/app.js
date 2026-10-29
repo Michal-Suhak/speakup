@@ -17,15 +17,20 @@ const TEXT = {
   micDenied: "Brak dostępu do mikrofonu. Zezwól na niego w ustawieniach przeglądarki albo pisz w polu poniżej.",
   noMic: "Nie znaleziono mikrofonu. Możesz pisać w polu poniżej.",
   noRecorder: "Ta przeglądarka nie nagrywa dźwięku. Możesz pisać w polu poniżej.",
+  thinking: "tutor zastanawia się…",
+  speaking: "tutor mówi…",
+  playFailed: "Nie udało się odtworzyć głosu tutora. Kliknij „powtórz”.",
 };
 const MIN_RECORDING_MS = 500;
 const MAX_RECORDING_MS = 60_000;
 const views = ["start-view", "profile-view", "chat-view"];
+const player = new Audio();
 
 let profiles = [];
 let current = null;
 let sessionId = null;
 let busy = false;
+let speaking = false;
 let stream = null;
 let recorder = null;
 let wantRecording = false;
@@ -207,10 +212,44 @@ function addCorrections(message, corrections) {
 
 function setBusy(value) {
   busy = value;
-  $("status").hidden = !busy;
-  $("mic").disabled = busy;
+  $("status").hidden = !busy && !speaking;
+  $("status").textContent = busy ? TEXT.thinking : TEXT.speaking;
+  $("mic").disabled = busy || speaking;
+  $("repeat").disabled = busy || speaking;
   $("text-form").querySelectorAll("input, button").forEach((el) => (el.disabled = busy));
   document.querySelectorAll("#start-view button").forEach((el) => (el.disabled = busy));
+}
+
+function setSpeaking(value) {
+  speaking = value;
+  setBusy(busy);
+}
+
+async function playReply() {
+  player.currentTime = 0;
+  setSpeaking(true);
+  try {
+    await player.play();
+  } catch (error) {
+    // a newer reply or "nowa rozmowa" interrupted this one and owns the state now
+    if (error.name === "AbortError") return;
+    setSpeaking(false);
+    showError(TEXT.playFailed);
+  }
+}
+
+function speak(audio) {
+  if ($("chat-view").hidden) return;
+  stopSpeaking();
+  if (audio) player.src = `data:audio/mpeg;base64,${audio}`;
+  else player.removeAttribute("src");
+  $("repeat").hidden = !audio;
+  if (audio) playReply();
+}
+
+function stopSpeaking() {
+  player.pause();
+  setSpeaking(false);
 }
 
 async function startSession(topic) {
@@ -222,6 +261,7 @@ async function startSession(topic) {
     $("transcript").replaceChildren();
     show("chat-view");
     addMessage("tutor", data.reply);
+    speak(data.audio);
   } finally {
     setBusy(false);
     $("mic").focus();
@@ -239,6 +279,7 @@ async function sendText(event) {
     const data = await api("POST", "/api/text", { session_id: sessionId, text });
     addCorrections(message, data.corrections);
     addMessage("tutor", data.reply);
+    speak(data.audio);
   } catch (error) {
     message.parentElement.remove();
     $("text").value = text;
@@ -255,7 +296,7 @@ function setRecording(recording) {
 }
 
 async function startRecording() {
-  if (recorder || busy || wantRecording) return;
+  if (recorder || busy || speaking || wantRecording) return;
   wantRecording = true;
   if (!window.MediaRecorder) throw new Error(TEXT.noRecorder);
   try {
@@ -296,6 +337,7 @@ async function sendRecording(chunks, mimeType, duration) {
     const data = await api("POST", "/api/turn", form);
     addCorrections(addMessage("learner", data.user_text), data.corrections);
     addMessage("tutor", data.reply);
+    speak(data.audio);
   } finally {
     setBusy(false);
   }
@@ -335,9 +377,13 @@ $("start-form").onsubmit = guarded((event) => {
 $("text-form").onsubmit = guarded(sendText);
 $("new-session").onclick = () => {
   releaseMicrophone();
+  stopSpeaking();
   sessionId = null;
   show("start-view");
 };
+$("repeat").onclick = guarded(playReply);
+player.onended = () => setSpeaking(false);
+player.onerror = () => setSpeaking(false);
 $("mic").onpointerdown = guarded(startRecording);
 ["pointerup", "pointerleave", "pointercancel"].forEach((name) => $("mic").addEventListener(name, stopRecording));
 document.addEventListener("keydown", (event) => {
