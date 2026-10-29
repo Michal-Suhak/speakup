@@ -1,9 +1,9 @@
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Form, HTTPException, UploadFile
 from pydantic import BaseModel, Field, StringConstraints
 
-from tutor import llm
+from tutor import llm, stt
 from tutor.profiles import load_profile
 from tutor.session import Session, get_session, register_session
 
@@ -49,6 +49,12 @@ class TurnResponse(BaseModel):
     corrections: list[CorrectionOut] = Field(description="Mistakes to show the learner; may be empty.")
 
 
+class VoiceTurnResponse(TurnResponse):
+    """The tutor's answer to one spoken learner message."""
+
+    user_text: str = Field(description="What the learner said, as transcribed.", examples=["I go to Spain last summer."])
+
+
 @router.post("/session")
 def start_session(request: StartRequest) -> StartResponse:
     profile = load_profile(request.profile_id)
@@ -64,3 +70,13 @@ def start_session(request: StartRequest) -> StartResponse:
 def text_turn(request: TextRequest) -> TurnResponse:
     turn = llm.reply(get_session(request.session_id), request.text)
     return TurnResponse.model_validate(turn, from_attributes=True)
+
+
+@router.post("/turn")
+def voice_turn(session_id: Annotated[str, Form()], audio: UploadFile) -> VoiceTurnResponse:
+    session = get_session(session_id)
+    with session.turn():
+        data = audio.file.read(stt.MAX_AUDIO_BYTES + 1)
+        user_text = stt.transcribe(data, audio.filename or "", audio.content_type or "application/octet-stream")
+        turn = llm.reply(session, user_text)
+    return VoiceTurnResponse(user_text=user_text, **TurnResponse.model_validate(turn, from_attributes=True).model_dump())

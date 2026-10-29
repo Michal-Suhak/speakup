@@ -8,6 +8,7 @@ from config import BASE_DIR
 from tutor.llm import LLMError, LLMUnavailable
 from tutor.profiles import BrokenProfile, InvalidProfileId
 from tutor.session import SessionBusy, SessionNotFound
+from tutor.stt import NoSpeech, RecordingTooLong, UnsupportedFormat
 
 app = FastAPI(title="SpeakUp")
 app.include_router(profiles.router)
@@ -16,8 +17,11 @@ app.include_router(sessions.router)
 ERROR_STATUS = {
     InvalidProfileId: 400,
     BrokenProfile: 400,
+    NoSpeech: 400,
     SessionNotFound: 404,
     SessionBusy: 409,
+    RecordingTooLong: 413,
+    UnsupportedFormat: 415,
     LLMError: 502,
     LLMUnavailable: 503,
 }

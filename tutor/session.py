@@ -27,7 +27,8 @@ class Session:
     topic: str
     id: str = field(default_factory=lambda: uuid.uuid4().hex)
     messages: list[Message] = field(default_factory=list)
-    _lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
+    # reentrant, so a voice turn can hold the lock through transcription and the reply in one request
+    _lock: threading.RLock = field(default_factory=threading.RLock, repr=False)
 
     @contextmanager
     def turn(self) -> Iterator[None]:
