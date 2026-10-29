@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SpeakUp</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>SpeakUp</h1>
+      <p class="subtitle">zeszyt do mówienia po angielsku</p>
+    </header>
+    <p id="error" class="error" hidden></p>
+
+    <section id="start-view">
+      <h2><span class="step">1</span> Kto dziś ćwiczy?</h2>
+      <div id="profile-picker" class="row">
+        <select id="profile-select" aria-label="Profil"></select>
+        <button id="edit-profile" class="link" type="button">edytuj profil</button>
+      </div>
+      <form id="new-profile" class="row">
+        <input id="new-name" placeholder="albo wpisz imię nowej osoby" maxlength="40" required>
+        <button type="submit" class="link">utwórz profil</button>
+      </form>
+
+      <div id="topic-box" hidden>
+        <h2><span class="step">2</span> O czym rozmawiamy?</h2>
+        <div id="topics" class="topics"></div>
+        <form id="start-form" class="row">
+          <input id="topic" placeholder="własny temat, np. my last weekend" maxlength="80" required>
+          <button type="submit">Zaczynamy</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="profile-view" hidden>
+      <h2>Profil</h2>
+      <form id="profile-form" class="sheet">
+        <label><span>Imię</span><input name="name" maxlength="40" required></label>
+        <label><span>Poziom</span>
+          <select name="level">
+            <option>A1</option><option>A2</option><option>B1</option>
+            <option>B2</option><option>C1</option><option>C2</option>
+          </select>
+        </label>
+        <label><span>Lubię rozmawiać o</span><textarea name="interests" rows="2"></textarea><small>oddziel przecinkami</small></label>
+        <label><span>Mój cel</span><textarea name="goals" rows="2" maxlength="300"></textarea></label>
+        <label><span>Omijamy tematy</span><textarea name="avoid_topics" rows="2"></textarea><small>oddziel przecinkami</small></label>
+        <label><span>Poprawiaj mnie</span>
+          <select name="correction_style">
+            <option value="gentle">łagodnie, tylko ważne błędy</option>
+            <option value="strict">dokładnie, każdy błąd</option>
+          </select>
+        </label>
+        <div class="row">
+          <button type="submit">Zapisz</button>
+          <button id="cancel-profile" class="link" type="button">anuluj</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="chat-view" hidden>
+      <div class="chat-head">
+        <h2>Temat: <span id="chat-topic"></span></h2>
+        <button id="new-session" class="link" type="button">nowa rozmowa</button>
+      </div>
+      <div id="transcript" class="transcript"></div>
+      <p id="status" class="status" hidden>tutor zastanawia się…</p>
+      <form id="text-form" class="row answer">
+        <input id="text" placeholder="napisz po angielsku" maxlength="1000" autocomplete="off" required>
+        <button type="submit">Wyślij</button>
+      </form>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

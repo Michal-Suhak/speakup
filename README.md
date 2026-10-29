@@ -50,8 +50,8 @@ If everything works you will see `OK: key works`. Otherwise a message tells you 
 
 ## Running
 
-The app arrives in the next stages. It will be started with:
-
 ```bash
 uv run uvicorn app:app --reload
 ```
+
+Open http://localhost:8000, create your profile, pick a topic and chat with the tutor in text. Voice comes in the next stages.

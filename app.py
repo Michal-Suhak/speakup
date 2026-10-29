@@ -1,8 +1,10 @@
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from api import profiles, sessions
+from config import BASE_DIR
 from tutor.llm import LLMError, LLMUnavailable
 from tutor.profiles import BrokenProfile, InvalidProfileId
 from tutor.session import SessionBusy, SessionNotFound
@@ -35,3 +37,6 @@ def invalid_request(request: Request, error: RequestValidationError) -> JSONResp
     # FastAPI's default 422 body echoes the submitted value, which may be a learner message or profile text
     detail = [{"loc": e["loc"], "msg": e["msg"], "type": e["type"]} for e in error.errors()]
     return JSONResponse({"detail": detail}, status_code=422)
+
+
+app.mount("/", StaticFiles(directory=BASE_DIR / "static", html=True), name="static")

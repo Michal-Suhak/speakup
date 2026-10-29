@@ -73,7 +73,7 @@ def test_invalid_id_is_400(client, bad_id):
 
 def test_traversal_never_touches_files(client, tmp_path):
     response = client.put("/api/profiles/..%2F.env", json={"id": "x", "name": "X"})
-    assert response.status_code in (400, 404)
+    assert response.status_code in (400, 404, 405)
     assert not (tmp_path / ".env").exists()
 
 
