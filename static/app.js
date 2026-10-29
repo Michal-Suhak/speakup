@@ -20,10 +20,11 @@ const TEXT = {
   thinking: "tutor zastanawia się…",
   speaking: "tutor mówi…",
   playFailed: "Nie udało się odtworzyć głosu tutora. Kliknij „powtórz”.",
+  duration: (minutes) => `czas rozmowy: ${minutes} min`,
 };
 const MIN_RECORDING_MS = 500;
 const MAX_RECORDING_MS = 60_000;
-const views = ["start-view", "profile-view", "chat-view"];
+const views = ["start-view", "profile-view", "chat-view", "summary-view"];
 const player = new Audio();
 
 let profiles = [];
@@ -50,7 +51,7 @@ function errorMessage(path, status, detail) {
     return TEXT.invalidFields(fields);
   }
   if (status === 409) return TEXT.tutorBusy;
-  if (status === 404 && (path === "/api/text" || path === "/api/turn")) return TEXT.sessionExpired;
+  if (status === 404 && (path === "/api/text" || path === "/api/turn" || path.endsWith("/end"))) return TEXT.sessionExpired;
   if (status === 400 && path === "/api/turn") return TEXT.noSpeech;
   if (status === 413) return TEXT.recordingTooLong;
   return TEXT.httpError(status, detail);
@@ -194,20 +195,22 @@ function addCorrections(message, corrections) {
   const summary = document.createElement("summary");
   summary.textContent = TEXT.corrections(corrections.length);
   details.append(summary);
-  for (const c of corrections) {
-    const p = document.createElement("p");
-    p.className = "correction";
-    const wrong = document.createElement("s");
-    wrong.textContent = c.you_said;
-    const better = document.createElement("strong");
-    better.textContent = c.better;
-    const explanation = document.createElement("div");
-    explanation.className = "explanation";
-    explanation.textContent = c.explanation_pl;
-    p.append(wrong, " → ", better, explanation);
-    details.append(p);
-  }
+  details.append(...corrections.map(correctionLine));
   message.append(details);
+}
+
+function correctionLine(c) {
+  const p = document.createElement("p");
+  p.className = "correction";
+  const wrong = document.createElement("s");
+  wrong.textContent = c.you_said;
+  const better = document.createElement("strong");
+  better.textContent = c.better;
+  const explanation = document.createElement("div");
+  explanation.className = "explanation";
+  explanation.textContent = c.explanation_pl;
+  p.append(wrong, " → ", better, explanation);
+  return p;
 }
 
 function setBusy(value) {
@@ -217,7 +220,7 @@ function setBusy(value) {
   $("mic").disabled = busy || speaking;
   $("repeat").disabled = busy || speaking;
   $("text-form").querySelectorAll("input, button").forEach((el) => (el.disabled = busy));
-  document.querySelectorAll("#start-view button").forEach((el) => (el.disabled = busy));
+  document.querySelectorAll("#start-view button, #end-session").forEach((el) => (el.disabled = busy));
 }
 
 function setSpeaking(value) {
@@ -288,6 +291,52 @@ async function sendText(event) {
     setBusy(false);
     $("text").focus();
   }
+}
+
+async function endSession() {
+  releaseMicrophone();
+  stopSpeaking();
+  setBusy(true);
+  try {
+    const data = await api("POST", `/api/session/${sessionId}/end`);
+    sessionId = null;
+    showSummary(data);
+  } finally {
+    setBusy(false);
+  }
+}
+
+function listItem(...content) {
+  const li = document.createElement("li");
+  li.append(...content);
+  return li;
+}
+
+function vocabularyItem(v) {
+  const word = document.createElement("strong");
+  word.textContent = v.word;
+  const example = document.createElement("div");
+  example.className = "explanation";
+  example.textContent = v.example;
+  return listItem(word, ` – ${v.meaning_pl}`, example);
+}
+
+function fillSection(id, items, render) {
+  $(id).replaceChildren(...items.map(render));
+  $(id).parentElement.hidden = items.length === 0;
+}
+
+function showSummary({ summary, duration_seconds }) {
+  $("summary-duration").textContent = TEXT.duration(Math.max(1, Math.round(duration_seconds / 60)));
+  $("summary-empty").hidden = Boolean(summary);
+  $("summary-content").hidden = !summary;
+  if (summary) {
+    fillSection("summary-corrections", summary.top_corrections, correctionLine);
+    fillSection("summary-vocabulary", summary.useful_vocabulary, vocabularyItem);
+    fillSection("summary-strengths", summary.strengths, (text) => listItem(text));
+    $("summary-tip").textContent = summary.tip_pl;
+  }
+  show("summary-view");
 }
 
 function setRecording(recording) {
@@ -381,6 +430,8 @@ $("new-session").onclick = () => {
   sessionId = null;
   show("start-view");
 };
+$("end-session").onclick = guarded(endSession);
+$("summary-new").onclick = () => show("start-view");
 $("repeat").onclick = guarded(playReply);
 player.onended = () => setSpeaking(false);
 player.onerror = () => setSpeaking(false);

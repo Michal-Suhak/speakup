@@ -64,7 +64,10 @@
     <section id="chat-view" hidden>
       <div class="chat-head">
         <h2>Temat: <span id="chat-topic"></span></h2>
-        <button id="new-session" class="link" type="button">nowa rozmowa</button>
+        <div class="row">
+          <button id="new-session" class="link" type="button">nowa rozmowa</button>
+          <button id="end-session" type="button">zakończ sesję</button>
+        </div>
       </div>
       <div id="transcript" class="transcript"></div>
       <p id="status" class="status" hidden></p>
@@ -78,6 +81,20 @@
           <input id="text" placeholder="albo napisz po angielsku" maxlength="1000" autocomplete="off" required>
           <button type="submit" class="link">wyślij</button>
         </form>
+      </div>
+    </section>
+    <section id="summary-view" hidden>
+      <div class="chat-head">
+        <h2>Podsumowanie</h2>
+        <button id="summary-new" class="link" type="button">nowa rozmowa</button>
+      </div>
+      <p id="summary-duration" class="status"></p>
+      <p id="summary-empty" hidden>Rozmowa była za krótka na podsumowanie. Następnym razem powiedz coś więcej!</p>
+      <div id="summary-content">
+        <div><h3>Do poprawy</h3><div id="summary-corrections"></div></div>
+        <div><h3>Warte zapamiętania</h3><ul id="summary-vocabulary"></ul></div>
+        <div><h3>Dobrze ci idzie</h3><ul id="summary-strengths"></ul></div>
+        <div><h3>Na następny raz</h3><p id="summary-tip"></p></div>
       </div>
     </section>
   </main>
