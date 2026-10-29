@@ -1,5 +1,7 @@
 import base64
+import logging
 import time
+from dataclasses import asdict
 from typing import Annotated
 
 from fastapi import APIRouter, Form, HTTPException, UploadFile
@@ -10,6 +12,7 @@ from tutor.profiles import load_profile
 from tutor.schemas import Summary, TutorTurn
 from tutor.session import Session, get_session, register_session, remove_session
 
+log = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["sessions"])
 
 Topic = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=80)]
@@ -63,6 +66,8 @@ class VoiceTurnResponse(TurnResponse):
 class EndResponse(BaseModel):
     summary: Summary | None = Field(description="Feedback on the session; null when the learner never answered.")
     duration_seconds: int = Field(description="Time from the start of the session to its end.")
+    usage: dict[str, int] = Field(description="Tokens and characters used by the session, including the summary.")
+    cost_usd: float = Field(description="Approximate cost of the session in USD, from the rates in config.py.")
 
 
 def _turn_fields(turn: TutorTurn) -> dict:
@@ -70,7 +75,7 @@ def _turn_fields(turn: TutorTurn) -> dict:
 
 
 def speak(session: Session, text: str) -> str | None:
-    audio = tts.synthesize(text, session.profile.level)
+    audio = tts.synthesize(text, session.profile.level, session.usage)
     return base64.b64encode(audio).decode("ascii") if audio else None
 
 
@@ -97,7 +102,7 @@ def voice_turn(session_id: Annotated[str, Form()], audio: UploadFile) -> VoiceTu
     session = get_session(session_id)
     with session.turn():
         data = audio.file.read(stt.MAX_AUDIO_BYTES + 1)
-        user_text = stt.transcribe(data, audio.filename or "")
+        user_text = stt.transcribe(data, audio.filename or "", session.usage)
         turn = llm.reply(session, user_text)
     return VoiceTurnResponse(user_text=user_text, **_turn_fields(turn), audio=speak(session, turn.reply))
 
@@ -108,4 +113,10 @@ def end_session(session_id: str) -> EndResponse:
     with session.turn():
         summary = llm.summarize(session)
         remove_session(session_id)
-    return EndResponse(summary=summary, duration_seconds=round(time.monotonic() - session.started))
+    log.info("Session %s ended: %.4f USD, %s", session.id, session.usage.cost_usd(), asdict(session.usage))
+    return EndResponse(
+        summary=summary,
+        duration_seconds=round(time.monotonic() - session.started),
+        usage=asdict(session.usage),
+        cost_usd=round(session.usage.cost_usd(), 6),
+    )

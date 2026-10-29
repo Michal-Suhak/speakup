@@ -29,7 +29,7 @@ def isolated(tmp_path, monkeypatch):
 def calls(monkeypatch):
     recorded = []
 
-    def fake_ask(instructions, messages, text_format=TutorTurn):
+    def fake_ask(instructions, messages, usage, text_format=TutorTurn):
         recorded.append((instructions, list(messages), text_format))
         if text_format is Summary:
             return SUMMARY
@@ -60,6 +60,8 @@ def test_summary_of_the_whole_session(client, session_id, calls):
     assert response.status_code == 200
     assert response.json()["summary"] == SUMMARY.model_dump()
     assert isinstance(response.json()["duration_seconds"], int)
+    assert response.json()["usage"]["tts_characters"] == 2 * len("Where?")
+    assert response.json()["cost_usd"] > 0
     instructions, messages, text_format = calls[-1]
     assert text_format is Summary
     assert "Session topic: Travel" in instructions

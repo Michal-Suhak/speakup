@@ -5,6 +5,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field
 from typing import Iterator, Literal
 
+import config
 from tutor.profiles import Profile
 
 
@@ -23,12 +24,32 @@ class Message:
 
 
 @dataclass
+class Usage:
+    chat_input_tokens: int = 0
+    chat_output_tokens: int = 0
+    stt_input_tokens: int = 0
+    stt_output_tokens: int = 0
+    tts_characters: int = 0
+
+    def cost_usd(self) -> float:
+        per_token = (
+            self.chat_input_tokens * config.CHAT_INPUT_USD_PER_1M_TOKENS
+            + self.chat_output_tokens * config.CHAT_OUTPUT_USD_PER_1M_TOKENS
+            + self.stt_input_tokens * config.STT_INPUT_USD_PER_1M_TOKENS
+            + self.stt_output_tokens * config.STT_OUTPUT_USD_PER_1M_TOKENS
+            + self.tts_characters * config.TTS_USD_PER_1M_CHARACTERS
+        )
+        return per_token / 1_000_000
+
+
+@dataclass
 class Session:
     profile: Profile
     topic: str
     id: str = field(default_factory=lambda: uuid.uuid4().hex)
     messages: list[Message] = field(default_factory=list)
     started: float = field(default_factory=time.monotonic)
+    usage: Usage = field(default_factory=Usage)
     # reentrant, so a voice turn can hold the lock through transcription and the reply in one request
     _lock: threading.RLock = field(default_factory=threading.RLock, repr=False)
 

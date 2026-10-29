@@ -4,7 +4,7 @@ from pydantic import ValidationError
 from tutor import llm
 from tutor.profiles import Profile
 from tutor.schemas import MAX_CORRECTIONS, Correction, TutorTurn
-from tutor.session import Session
+from tutor.session import Session, Usage
 
 
 def correction(you_said, severity="important"):
@@ -66,7 +66,7 @@ def test_visible_corrections_put_important_first_and_cap():
 
 def test_start_drops_corrections(monkeypatch):
     monkeypatch.setattr(
-        llm, "_ask", lambda instructions, messages: TutorTurn(analysis="x", corrections=[correction("x")], reply="Hi?")
+        llm, "_ask", lambda instructions, messages, *_: TutorTurn(analysis="x", corrections=[correction("x")], reply="Hi?")
     )
     session = Session(profile=Profile(id="a", name="A"), topic="Food")
     assert llm.start(session).corrections == []
@@ -79,7 +79,7 @@ def test_ask_retries_once_after_invalid_output(monkeypatch):
     except ValidationError as error:
         invalid = error
 
-    results = [invalid, type("Parsed", (), {"output_parsed": turn})()]
+    results = [invalid, type("Parsed", (), {"output_parsed": turn, "usage": None})()]
 
     class Responses:
         def parse(self, **kwargs):
@@ -89,5 +89,5 @@ def test_ask_retries_once_after_invalid_output(monkeypatch):
             return result
 
     monkeypatch.setattr(llm, "get_client", lambda: type("Client", (), {"responses": Responses()})())
-    assert llm._ask("instructions", []) == turn
+    assert llm._ask("instructions", [], Usage()) == turn
     assert results == []
