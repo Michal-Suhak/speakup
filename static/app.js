@@ -141,19 +141,25 @@ async function createProfile(event) {
 }
 
 function addMessage(role, text) {
-  const div = document.createElement("div");
-  div.className = `message ${role}`;
-  div.textContent = text;
-  $("transcript").append(div);
-  div.scrollIntoView({ block: "end" });
-  return div;
+  const line = document.createElement("div");
+  line.className = `line ${role}`;
+  const who = document.createElement("span");
+  who.className = "who";
+  who.textContent = role === "tutor" ? "Tutor" : current.name;
+  const said = document.createElement("div");
+  said.className = "said";
+  said.textContent = text;
+  line.append(who, said);
+  $("transcript").append(line);
+  line.scrollIntoView({ block: "end" });
+  return said;
 }
 
 function addCorrections(message, corrections) {
   if (corrections.length === 0) return;
   const details = document.createElement("details");
   const summary = document.createElement("summary");
-  summary.textContent = `Poprawki (${corrections.length})`;
+  summary.textContent = `poprawki: ${corrections.length}`;
   details.append(summary);
   for (const c of corrections) {
     const p = document.createElement("p");
@@ -204,7 +210,7 @@ async function sendText(event) {
     addCorrections(message, data.corrections);
     addMessage("tutor", data.reply);
   } catch (error) {
-    message.remove();
+    message.parentElement.remove();
     $("text").value = text;
     throw error;
   } finally {
