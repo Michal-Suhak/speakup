@@ -8,15 +8,8 @@ The backlog changes only through PRs, like everything on `main`. New ideas can b
 
 ## Product
 
-- **Session history and progress in SQLite** – save finished sessions and show progress over time; introduce SQLite (one local file) here, as the first feature that needs a database, and decide whether profiles move there too.
-- **Internet deployment with login** – needs login and the spending limit first, so nobody else uses the API key, and a database, because free hosts lose files on restart. Free options checked on 2026-10-29:
-  - Cloudflare quick tunnel: `cloudflared tunnel --url http://localhost:8000`, no account, an HTTPS link valid only while the computer runs the app;
-  - Render free tier: sleeps after 15 minutes idle, about a minute to wake up;
-  - Google Cloud Run free tier;
-  - Hugging Face Spaces with Docker: free CPU, sleeps after 48 hours idle.
-
-  Fly.io and Railway offer only a trial for new accounts, and Koyeb reportedly dropped its free plan in 2026.
-- **Spending limit** – warn or stop when a session or month goes over an amount set in `.env`, using the cost the app already counts.
+- **Session history and progress** – save finished sessions and show progress over time, in the database from the [online deployment draft](specs/online-deployment.md) (SQLite if that draft is rejected).
+- **Admin panel in the browser** – accounts, limits and usage without the terminal commands from the online deployment draft, for when there are more learners.
 - **Cleanup of abandoned sessions** – end sessions after e.g. 30 minutes without activity and log their cost, for when the browser's end call never arrives.
 - **Memory for long conversations** – summarise older turns instead of cutting the history at the last 40 messages.
 
