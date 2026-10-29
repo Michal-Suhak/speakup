@@ -115,6 +115,11 @@ def reply(session: Session, user_text: str) -> TutorTurn:
 def summarize(session: Session) -> Summary | None:
     """Feedback on the whole session, or None when the learner never answered."""
     with session.turn():
-        if not any(m.role == "user" for m in session.messages):
+        said = [m.content.casefold() for m in session.messages if m.role == "user"]
+        if not said:
             return None
-        return _ask(render_summary_prompt(session), [*session.messages, Message("user", SUMMARY_INSTRUCTION)], Summary)
+        summary = _ask(render_summary_prompt(session), [*session.messages, Message("user", SUMMARY_INSTRUCTION)], Summary)
+        summary.top_corrections = [
+            c for c in summary.top_corrections if any(c.you_said.strip().casefold() in text for text in said)
+        ]
+        return summary

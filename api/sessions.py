@@ -105,6 +105,7 @@ def voice_turn(session_id: Annotated[str, Form()], audio: UploadFile) -> VoiceTu
 @router.post("/session/{session_id}/end")
 def end_session(session_id: str) -> EndResponse:
     session = get_session(session_id)
-    summary = llm.summarize(session)
-    remove_session(session_id)
+    with session.turn():
+        summary = llm.summarize(session)
+        remove_session(session_id)
     return EndResponse(summary=summary, duration_seconds=round(time.monotonic() - session.started))

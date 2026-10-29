@@ -68,6 +68,14 @@ def test_summary_of_the_whole_session(client, session_id, calls):
     assert client.post("/api/text", json={"session_id": session_id, "text": "Hi"}).status_code == 404
 
 
+def test_summary_drops_corrections_the_learner_never_said(client, session_id, calls, monkeypatch):
+    client.post("/api/text", json={"session_id": session_id, "text": "I go to Rome"})
+    invented = SummaryCorrection(you_said="Where", better="Where to", explanation_pl="Zmyślone.")
+    monkeypatch.setattr(llm, "_ask", lambda *args: SUMMARY.model_copy(update={"top_corrections": [invented, *SUMMARY.top_corrections]}))
+
+    assert [c["you_said"] for c in end(client, session_id).json()["summary"]["top_corrections"]] == ["I go"]
+
+
 def test_session_without_answers_has_no_summary(client, session_id, calls):
     response = end(client, session_id)
 
