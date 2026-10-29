@@ -1,4 +1,5 @@
 import base64
+import time
 from typing import Annotated
 
 from fastapi import APIRouter, Form, HTTPException, UploadFile
@@ -6,8 +7,8 @@ from pydantic import BaseModel, Field, StringConstraints
 
 from tutor import llm, stt, tts
 from tutor.profiles import load_profile
-from tutor.schemas import TutorTurn
-from tutor.session import Session, get_session, register_session
+from tutor.schemas import Summary, TutorTurn
+from tutor.session import Session, get_session, register_session, remove_session
 
 router = APIRouter(prefix="/api", tags=["sessions"])
 
@@ -59,6 +60,11 @@ class VoiceTurnResponse(TurnResponse):
     user_text: str = Field(description="What the learner said, as transcribed.", examples=["I go to Spain last summer."])
 
 
+class EndResponse(BaseModel):
+    summary: Summary | None = Field(description="Feedback on the session; null when the learner never answered.")
+    duration_seconds: int = Field(description="Time from the start of the session to its end.")
+
+
 def _turn_fields(turn: TutorTurn) -> dict:
     return TurnResponse.model_validate(turn, from_attributes=True).model_dump(exclude={"audio"})
 
@@ -94,3 +100,12 @@ def voice_turn(session_id: Annotated[str, Form()], audio: UploadFile) -> VoiceTu
         user_text = stt.transcribe(data, audio.filename or "")
         turn = llm.reply(session, user_text)
     return VoiceTurnResponse(user_text=user_text, **_turn_fields(turn), audio=speak(session, turn.reply))
+
+
+@router.post("/session/{session_id}/end")
+def end_session(session_id: str) -> EndResponse:
+    session = get_session(session_id)
+    with session.turn():
+        summary = llm.summarize(session)
+        remove_session(session_id)
+    return EndResponse(summary=summary, duration_seconds=round(time.monotonic() - session.started))

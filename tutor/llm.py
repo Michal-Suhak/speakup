@@ -1,11 +1,12 @@
 from functools import lru_cache
 from string import Template
+from typing import TypeVar
 
 from openai import OpenAI, OpenAIError
 from pydantic import ValidationError
 
 import config
-from tutor.schemas import Correction, TutorTurn
+from tutor.schemas import Correction, Summary, TutorTurn
 
 MAX_VISIBLE_CORRECTIONS = 3
 from tutor.session import Message, Session
@@ -20,6 +21,8 @@ START_INSTRUCTION = (
     "Start the session: greet the learner by name in one short sentence "
     "and ask your first question about the session topic."
 )
+SUMMARY_INSTRUCTION = "The session has ended. Write the summary of the whole conversation above."
+Answer = TypeVar("Answer", TutorTurn, Summary)
 
 
 class LLMUnavailable(Exception):
@@ -48,6 +51,12 @@ def render_system_prompt(session: Session) -> str:
     )
 
 
+def render_summary_prompt(session: Session) -> str:
+    profile = session.profile
+    template = Template((PROMPTS_DIR / "summary.md").read_text(encoding="utf-8"))
+    return template.substitute(name=profile.name, level=profile.level, topic=session.topic)
+
+
 @lru_cache
 def get_client() -> OpenAI:
     if not config.OPENAI_API_KEY:
@@ -55,14 +64,14 @@ def get_client() -> OpenAI:
     return OpenAI(api_key=config.OPENAI_API_KEY, timeout=REQUEST_TIMEOUT_SECONDS, max_retries=1)
 
 
-def _ask(instructions: str, messages: list[Message]) -> TutorTurn:
+def _ask(instructions: str, messages: list[Message], text_format: type[Answer] = TutorTurn) -> Answer:
     for _ in range(PARSE_ATTEMPTS):
         try:
             response = get_client().responses.parse(
                 model=config.CHAT_MODEL,
                 instructions=instructions,
                 input=[{"role": m.role, "content": m.content} for m in messages],
-                text_format=TutorTurn,
+                text_format=text_format,
                 max_output_tokens=MAX_OUTPUT_TOKENS,
             )
         except OpenAIError as error:
@@ -101,3 +110,16 @@ def reply(session: Session, user_text: str) -> TutorTurn:
         turn.corrections = visible_corrections(turn, user_text, session.profile.correction_style)
         session.messages += [message, Message("assistant", turn.reply)]
         return turn
+
+
+def summarize(session: Session) -> Summary | None:
+    """Feedback on the whole session, or None when the learner never answered."""
+    with session.turn():
+        said = [m.content.casefold() for m in session.messages if m.role == "user"]
+        if not said:
+            return None
+        summary = _ask(render_summary_prompt(session), [*session.messages, Message("user", SUMMARY_INSTRUCTION)], Summary)
+        summary.top_corrections = [
+            c for c in summary.top_corrections if any(c.you_said.strip().casefold() in text for text in said)
+        ]
+        return summary
