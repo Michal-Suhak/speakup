@@ -48,7 +48,7 @@ class Correction(BaseModel):
 
 
 class TutorTurn(BaseModel):
-    """The tutor's answer to the learner's last message. Fill the fields in order: analysis, corrections, reply."""
+    """The tutor's answer to the learner's last message. Fill the fields in order: analysis, corrections, reply, reply_pl."""
 
     analysis: str = Field(
         description=(
@@ -70,6 +70,14 @@ class TutorTurn(BaseModel):
             "text (no markdown, emoji, lists or brackets), ending with one question. Weave in the correct form "
             "of each mistake that the correction style asks to fix, naturally and without lecturing, "
             "e.g. 'Oh, you went to Spain last summer? Nice!'."
+        )
+    )
+    reply_pl: str = Field(
+        description=(
+            "The reply translated into natural Polish, same meaning and tone, plain text, shown on screen only. "
+            "The learner's gender is unknown, even when their name seems to suggest it: never use gendered "
+            "past-tense forms for the learner (write 'Udało ci się pojechać?' or 'Co tam było?', not 'Pojechałeś?' "
+            "or 'Co robiłaś?'). Empty string if you cannot translate it well."
         )
     )
 

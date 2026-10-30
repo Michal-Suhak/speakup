@@ -9,6 +9,8 @@ const TEXT = {
   noFreeId: "Nie udało się nadać id profilu, wpisz inne imię.",
   tutorName: "Tutor",
   corrections: (count) => `poprawki: ${count}`,
+  translate: "przetłumacz",
+  hideTranslation: "ukryj tłumaczenie",
   micIdle: "przytrzymaj i mów",
   micRecording: "nagrywam… puść, aby wysłać",
   tooShort: "Nagranie było za krótkie. Przytrzymaj przycisk przez cały czas, kiedy mówisz.",
@@ -26,6 +28,7 @@ const TEXT = {
 const MIN_RECORDING_MS = 500;
 const MAX_RECORDING_MS = 60_000;
 const SLOW_RATE = 0.75;
+const TRANSLATION_OPEN_LEVELS = ["A1", "A2"];
 const views = ["start-view", "profile-view", "chat-view", "summary-view"];
 const player = new Audio();
 
@@ -203,6 +206,26 @@ function addCorrections(message, corrections) {
   message.append(details);
 }
 
+function addTranslation(message, text) {
+  if (!text) return;
+  const details = document.createElement("details");
+  details.className = "translation";
+  const summary = document.createElement("summary");
+  const translation = document.createElement("div");
+  translation.className = "explanation";
+  translation.textContent = text;
+  details.append(summary, translation);
+  details.ontoggle = () => (summary.textContent = details.open ? TEXT.hideTranslation : TEXT.translate);
+  details.open = TRANSLATION_OPEN_LEVELS.includes(current.level);
+  details.ontoggle();
+  message.append(details);
+}
+
+function addReply(data) {
+  addTranslation(addMessage("tutor", data.reply), data.reply_pl);
+  speak(data.audio);
+}
+
 function correctionLine(c) {
   const p = document.createElement("p");
   p.className = "correction";
@@ -270,8 +293,7 @@ async function startSession(topic) {
     $("chat-topic").textContent = topic;
     $("transcript").replaceChildren();
     show("chat-view");
-    addMessage("tutor", data.reply);
-    speak(data.audio);
+    addReply(data);
   } finally {
     setBusy(false);
     $("mic").focus();
@@ -288,8 +310,7 @@ async function sendText(event) {
   try {
     const data = await api("POST", "/api/text", { session_id: sessionId, text });
     addCorrections(message, data.corrections);
-    addMessage("tutor", data.reply);
-    speak(data.audio);
+    addReply(data);
   } catch (error) {
     message.parentElement.remove();
     $("text").value = text;
@@ -406,8 +427,7 @@ async function sendRecording(chunks, mimeType, duration) {
   try {
     const data = await api("POST", "/api/turn", form);
     addCorrections(addMessage("learner", data.user_text), data.corrections);
-    addMessage("tutor", data.reply);
-    speak(data.audio);
+    addReply(data);
   } finally {
     setBusy(false);
   }

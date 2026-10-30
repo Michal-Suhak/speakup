@@ -39,7 +39,7 @@ def calls(monkeypatch):
         corrections = []
         if messages[-1].content == "I go there yesterday":
             corrections = [Correction(you_said="I go", better="I went", mistake_type="grammar", severity="important", explanation_pl="Czas przeszły.")]
-        return TutorTurn(analysis="Notes.", corrections=corrections, reply=f"Reply {len(recorded)}?")
+        return TutorTurn(analysis="Notes.", corrections=corrections, reply=f"Reply {len(recorded)}?", reply_pl="Po polsku.")
 
     monkeypatch.setattr(llm, "_ask", fake_ask)
     return recorded
@@ -78,6 +78,7 @@ def test_start_and_text_turn(client, calls):
     assert started.status_code == 200
     session_id = started.json()["session_id"]
     assert started.json()["reply"] == "Reply 1?"
+    assert started.json()["reply_pl"] == "Po polsku."
 
     first_instructions, first_messages = calls[0]
     assert "Session topic: Football" in first_instructions
@@ -88,6 +89,7 @@ def test_start_and_text_turn(client, calls):
     assert turn.json() == {
         "corrections": [{"you_said": "I go", "better": "I went", "explanation_pl": "Czas przeszły."}],
         "reply": "Reply 2?",
+        "reply_pl": "Po polsku.",
         "audio": "SUQzIGZha2UgbXAz",
     }
 
@@ -148,7 +150,7 @@ def test_parallel_turn_is_409(client, monkeypatch):
         if len(messages) > 1:
             entered.set()
             release.wait(5)
-        return TutorTurn(analysis="Notes.", corrections=[], reply="Hi?")
+        return TutorTurn(analysis="Notes.", corrections=[], reply="Hi?", reply_pl="Po polsku.")
 
     monkeypatch.setattr(llm, "_ask", slow_ask)
     session_id = start(client).json()["session_id"]
@@ -198,7 +200,7 @@ def test_corrections_must_quote_the_learner(client, monkeypatch):
                 Correction(you_said="i GO there", better="I went there", mistake_type="grammar", severity="important", explanation_pl="Czas przeszły."),
                 Correction(you_said="I has", better="I have", mistake_type="grammar", severity="important", explanation_pl="Odmiana."),
             ],
-            reply="Nice?",
+            reply="Nice?", reply_pl="Po polsku.",
         )
 
     monkeypatch.setattr(llm, "_ask", ask)
@@ -275,7 +277,7 @@ def test_ask_maps_failures_to_llm_error(monkeypatch, result):
 
 
 def test_ask_sends_history_and_limits(monkeypatch):
-    turn = TutorTurn(analysis="Notes.", corrections=[], reply="Hi?")
+    turn = TutorTurn(analysis="Notes.", corrections=[], reply="Hi?", reply_pl="Po polsku.")
     client = FakeClient(Parsed(turn))
     monkeypatch.setattr(llm, "get_client", lambda: client)
 
