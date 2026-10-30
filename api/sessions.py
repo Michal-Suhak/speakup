@@ -29,6 +29,7 @@ class StartRequest(BaseModel):
 class StartResponse(BaseModel):
     session_id: str = Field(description="Send it with every message of this session.")
     reply: str = Field(description="The tutor's greeting, in English.", examples=["Hi Michał! Where did you travel last?"])
+    reply_pl: str = Field(description="The greeting in Polish; empty when there is no translation.", examples=["Cześć Michał! Dokąd ostatnio udało ci się pojechać?"])
     audio: str | None = Field(None, description="The reply as base64 mp3; missing when speech synthesis failed.")
 
 
@@ -53,6 +54,7 @@ class TurnResponse(BaseModel):
     """The tutor's answer to one learner message."""
 
     reply: str = Field(description="What the tutor says, in English.", examples=["Oh, you went to Spain? Nice! What did you see?"])
+    reply_pl: str = Field(description="The reply in Polish; empty when there is no translation.", examples=["O, Hiszpania? Super! Co udało ci się zobaczyć?"])
     corrections: list[CorrectionOut] = Field(description="Mistakes to show the learner; may be empty.")
     audio: str | None = Field(None, description="The reply as base64 mp3; missing when speech synthesis failed.")
 
@@ -88,7 +90,7 @@ def start_session(request: StartRequest) -> StartResponse:
     turn = llm.start(session)
     reply_audio = speak(session, turn.reply)
     register_session(session)
-    return StartResponse(session_id=session.id, reply=turn.reply, audio=reply_audio)
+    return StartResponse(session_id=session.id, reply=turn.reply, reply_pl=turn.reply_pl, audio=reply_audio)
 
 
 @router.post("/text")

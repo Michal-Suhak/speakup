@@ -207,6 +207,7 @@ summary {
 summary::-webkit-details-marker { display: none; }
 summary::before { content: "✎ "; }
 details[open] summary { text-decoration: underline; }
+.translation summary::before { content: "PL "; }
 
 .correction {
   margin: 0 0 4px;

@@ -100,7 +100,7 @@ Profile, new field (default `auto`):
 ### Prompts
 
 - `TutorTurn.reply_pl` field description: a natural Polish translation of `reply`, same meaning and tone, plain text; addresses the learner without assuming gender (as in `prompts/summary.md`); empty string if unsure.
-- `prompts/tutor.md`: the field order line becomes `analysis`, `corrections`, `reply`, `reply_pl`. The rule "speak only English" stays: it applies to `reply`.
+- `prompts/tutor.md`: the field order line becomes `analysis`, `corrections`, `reply`, `reply_pl`; the English-only rule now names `reply`. A new "Polish translation" section carries the gender rule: only forms that do not show gender (present tense, "udało ci się" + infinitive, impersonal phrases), rephrase past-tense sentences around the event, correct Polish over word-for-word accuracy. The field description alone was not enough (see Decisions).
 - `prompts/transcribe.md` unchanged.
 
 ### Interface
@@ -119,12 +119,13 @@ Profile, new field (default `auto`):
 | Translation in the history | Not stored in `session.messages` | Store the whole turn | The model should see only English replies; it keeps the context short. |
 | Slower repeat | Browser `playbackRate` 0.75 on the audio already downloaded | Second TTS call with slower instructions | Instant, free, no new endpoint. Pitch is preserved by default in current browsers. |
 | Transcription language | Profile field `auto` \| `en`, default `auto` | Always `en`; per-session switch | `en` drops Polish words, which the tutor uses to suggest the English word (`polish_word` corrections), so it is opt-in per learner. |
+| Gender rule for `reply_pl` | Section in `prompts/tutor.md` with allowed forms and a rephrasing example | Rule only in the field description | In the stage 3 check the model used "byłaś", "chciałabyś" and "byłaś/byłeś" for a learner named Ola with the rule only in the description; a bare "never gendered" rule gave ungrammatical Polish ("Było cię w górach"). The rephrasing example gave correct, neutral Polish. |
 | One spec for three changes | One spec, three stages, one PR per stage | Three specs | Each change is a few dozen lines on the same voice loop. |
 
 ## 7. Cost, latency, privacy
 
 - **OpenAI calls:** no new calls. The tutor answer gets ~30–60 more output tokens per turn (≈0.00003 USD at the rates in `config.py`), counted in the existing usage.
-- **Latency:** the reply is generated before `reply_pl`, but TTS starts only after the whole answer, so each turn waits for the translation too: expected +0.3–0.6 s. Measured in stage 3 with the existing "LLM took N s" log; if it is over 1 s, we generate it only for A1–B1 (see section 8).
+- **Latency:** the reply is generated before `reply_pl`, but TTS starts only after the whole answer, so each turn waits for the translation too: expected +0.3–0.6 s. Stage 3 check: the translations are 25–45 tokens; "LLM took" was 2.0–5.8 s over 9 calls, with no before/after comparison on the same inputs, so the extra time is estimated from the token count, not measured. If the delay is noticeable in use, we generate the translation only for A1–B1 (see section 8).
 - **Slower repeat** and **transcription language** add no cost; `language="en"` may make transcription slightly faster.
 - **Privacy:** no new stored data apart from one profile field. Logs stay as they are (no translation text, no transcripts).
 
@@ -148,11 +149,11 @@ Profile, new field (default `auto`):
 - [ ] Manual check in Chrome and Safari.
 
 **Stage 3 – reply translation**
-- [ ] `reply_pl` in `TutorTurn`, prompt field order line.
-- [ ] `reply_pl` in the start and turn responses.
-- [ ] Translation toggle under tutor lines, unfolded for A1–A2.
-- [ ] Tests: responses contain `reply_pl`, history contains only `reply`.
-- [ ] Manual check of a few turns at A2 and B2 (meaning, gender-neutral form, latency in the log).
+- [x] `reply_pl` in `TutorTurn`, prompt field order line.
+- [x] `reply_pl` in the start and turn responses.
+- [x] Translation toggle under tutor lines, unfolded for A1–A2.
+- [x] Tests: responses contain `reply_pl`, history contains only `reply`.
+- [x] Manual check of a few turns at A2 and B2 (meaning, gender-neutral form, latency in the log).
 
 ## 10. Acceptance criteria
 
@@ -160,16 +161,16 @@ Profile, new field (default `auto`):
 - [x] With `en` the transcription request has `language="en"`.
 - [x] "wolniej" replays the last reply at 0.75× without an API call; "powtórz" plays it at 1×; a new reply plays at 1×.
 - [x] Both replay buttons are disabled while the tutor is thinking or speaking and hidden when there is no audio.
-- [ ] Every tutor line with a non-empty `reply_pl`, including the greeting, has a working "przetłumacz" toggle; lines with an empty one have no toggle.
-- [ ] For A1–A2 the translation is unfolded by default, for B1–C2 folded.
-- [ ] `reply_pl` is never spoken and never sent back to the model.
-- [ ] Translations in the manual check do not assume the learner's gender.
+- [x] Every tutor line with a non-empty `reply_pl`, including the greeting, has a working "przetłumacz" toggle; lines with an empty one have no toggle.
+- [x] For A1–A2 the translation is unfolded by default, for B1–C2 folded.
+- [x] `reply_pl` is never spoken and never sent back to the model.
+- [x] Translations in the manual check do not assume the learner's gender.
 
 ## 11. Tests and evaluation
 
 - Unit tests (pytest, `TestClient`, fake OpenAI client as in `tests/conftest.py`): profile field, `transcribe` arguments, `reply_pl` in responses, history content.
 - Manual: recordings with a strong accent in `auto` and `en`; slower repeat by ear in Chrome and Safari; a few A2 and B2 turns for translation quality and latency.
-- `tutor-eval`: the tutor prompt changes only in the field order line, so a short manual check is enough; no eval batch.
+- `tutor-eval`: the tutor prompt changes only in the translation section and the field order line, so a short manual check of a few A2 and B2 turns is enough; no eval batch.
 
 ## Changelog
 
@@ -179,3 +180,4 @@ Profile, new field (default `auto`):
 | 2026-10-29 | Accepted; open questions resolved with the default answers, each checked in its stage. |
 | 2026-10-29 | Stage 1 implemented: `speech_language` in the profile and the profile form, `language="en"` passed to transcription. |
 | 2026-10-29 | Stage 2 implemented: "wolniej" replays the last reply at 0.75× in the browser. |
+| 2026-10-30 | Stage 3 implemented: `reply_pl` with a translation toggle; gender rule moved into a "Polish translation" section of `prompts/tutor.md` after the manual check. |

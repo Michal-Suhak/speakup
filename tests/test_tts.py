@@ -17,7 +17,7 @@ def isolated(tmp_path, monkeypatch):
     monkeypatch.setattr(profiles, "PROFILES_DIR", tmp_path / "profiles")
     monkeypatch.setattr(session, "_sessions", {})
     save_profile(Profile(id="michal", name="Michał", level="A2"))
-    monkeypatch.setattr(llm, "_ask", lambda instructions, messages, *_: TutorTurn(analysis="", corrections=[], reply="Hi there?"))
+    monkeypatch.setattr(llm, "_ask", lambda instructions, messages, *_: TutorTurn(analysis="", corrections=[], reply="Hi there?", reply_pl="Po polsku."))
 
 
 @pytest.fixture
