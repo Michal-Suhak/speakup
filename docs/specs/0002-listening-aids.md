@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | `accepted` |
+| Status | `in-progress` |
 | Created | 2026-10-29 |
 | Last updated | 2026-10-29 |
 | Depends on | [0001](0001-mvp.md) |
@@ -138,10 +138,10 @@ Profile, new field (default `auto`):
 ## 9. Implementation plan
 
 **Stage 1 – transcription language**
-- [ ] `speech_language` in `Profile`, default `auto`.
-- [ ] `transcribe` passes `language="en"` for `en`; callers pass the session profile's value.
-- [ ] Profile form select; README line about the option.
-- [ ] Tests: profile default and validation, `transcribe` passes `language` only for `en`.
+- [x] `speech_language` in `Profile`, default `auto`.
+- [x] `transcribe` passes `language="en"` for `en`; callers pass the session profile's value.
+- [x] Profile form select; README line about the option.
+- [x] Tests: profile default and validation, `transcribe` passes `language` only for `en`.
 
 **Stage 2 – slower repeat**
 - [ ] "wolniej" button, rate reset in "powtórz" and for every new reply, disabled and hidden with "powtórz".
@@ -156,8 +156,8 @@ Profile, new field (default `auto`):
 
 ## 10. Acceptance criteria
 
-- [ ] A profile without `speech_language` loads as `auto`; `auto` sends the same transcription request as before.
-- [ ] With `en` the transcription request has `language="en"`.
+- [x] A profile without `speech_language` loads as `auto`; `auto` sends the same transcription request as before.
+- [x] With `en` the transcription request has `language="en"`.
 - [ ] "wolniej" replays the last reply at 0.75× without an API call; "powtórz" plays it at 1×; a new reply plays at 1×.
 - [ ] Both replay buttons are disabled while the tutor is thinking or speaking and hidden when there is no audio.
 - [ ] Every tutor line with a non-empty `reply_pl`, including the greeting, has a working "przetłumacz" toggle; lines with an empty one have no toggle.
@@ -177,3 +177,4 @@ Profile, new field (default `auto`):
 |---|---|
 | 2026-10-29 | Document created. |
 | 2026-10-29 | Accepted; open questions resolved with the default answers, each checked in its stage. |
+| 2026-10-29 | Stage 1 implemented: `speech_language` in the profile and the profile form, `language="en"` passed to transcription. |

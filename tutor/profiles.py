@@ -54,6 +54,9 @@ class Profile(BaseModel):
     correction_style: Literal["gentle", "strict"] = Field(
         "gentle", description="gentle: only important mistakes; strict: every mistake."
     )
+    speech_language: Literal["auto", "en"] = Field(
+        "auto", description="auto: detect the language, keeps Polish words; en: always transcribe as English."
+    )
 
 
 def _path(profile_id: str) -> Path:

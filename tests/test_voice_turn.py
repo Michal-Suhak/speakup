@@ -74,7 +74,16 @@ def test_voice_turn(client, session_id, transcriptions):
     sent = transcriptions.kwargs
     assert sent["file"] == ("turn.webm", AUDIO, "audio/webm")
     assert "keeping their grammar mistakes" in sent["prompt"]
+    assert "language" not in sent
     assert [m.content for m in session.get_session(session_id).messages][-2:] == ["I go there yesterday", "Nice?"]
+
+
+def test_english_only_profile_sets_the_transcription_language(client, transcriptions):
+    save_profile(Profile(id="michal", name="Michał", speech_language="en"))
+    session_id = client.post("/api/session", json={"profile_id": "michal", "topic": "Travel"}).json()["session_id"]
+
+    assert turn(client, session_id).status_code == 200
+    assert transcriptions.kwargs["language"] == "en"
 
 
 def test_safari_recording_keeps_mp4_extension(client, session_id, transcriptions):

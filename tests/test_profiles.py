@@ -29,6 +29,7 @@ def test_new_profile_gets_defaults():
     assert profile.interests == DEFAULT_INTERESTS
     assert profile.avoid_topics == []
     assert profile.correction_style == "gentle"
+    assert profile.speech_language == "auto"
 
 
 @pytest.mark.parametrize(
@@ -41,6 +42,7 @@ def test_new_profile_gets_defaults():
         {"interests": ["t"] * 21},
         {"avoid_topics": ["a" * 41]},
         {"correction_style": "harsh"},
+        {"speech_language": "pl"},
     ],
 )
 def test_profile_rejects_invalid_fields(fields):

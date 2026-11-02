@@ -26,7 +26,7 @@ class UnsupportedFormat(Exception):
     pass
 
 
-def transcribe(audio: bytes, filename: str, usage: Usage) -> str:
+def transcribe(audio: bytes, filename: str, usage: Usage, speech_language: str = "auto") -> str:
     extension = filename.rpartition(".")[2].lower()
     if extension not in FORMATS:
         raise UnsupportedFormat(f"Unsupported recording format. Use one of: {', '.join(sorted(FORMATS))}.")
@@ -40,6 +40,7 @@ def transcribe(audio: bytes, filename: str, usage: Usage) -> str:
                 model=config.STT_MODEL,
                 file=(f"turn.{extension}", audio, FORMATS[extension]),
                 prompt=(PROMPTS_DIR / "transcribe.md").read_text(encoding="utf-8").strip(),
+                **({"language": "en"} if speech_language == "en" else {}),
             )
     except OpenAIError as error:
         raise LLMError(f"Transcription failed ({type(error).__name__}). Try again in a moment.") from error
