@@ -144,7 +144,7 @@ Profile, new field (default `auto`):
 - [x] Tests: profile default and validation, `transcribe` passes `language` only for `en`.
 
 **Stage 2 – slower repeat**
-- [ ] "wolniej" button, rate reset in "powtórz" and for every new reply, disabled and hidden with "powtórz".
+- [x] "wolniej" button, rate reset in "powtórz" and for every new reply, disabled and hidden with "powtórz".
 - [ ] Manual check in Chrome and Safari.
 
 **Stage 3 – reply translation**
@@ -158,8 +158,8 @@ Profile, new field (default `auto`):
 
 - [x] A profile without `speech_language` loads as `auto`; `auto` sends the same transcription request as before.
 - [x] With `en` the transcription request has `language="en"`.
-- [ ] "wolniej" replays the last reply at 0.75× without an API call; "powtórz" plays it at 1×; a new reply plays at 1×.
-- [ ] Both replay buttons are disabled while the tutor is thinking or speaking and hidden when there is no audio.
+- [x] "wolniej" replays the last reply at 0.75× without an API call; "powtórz" plays it at 1×; a new reply plays at 1×.
+- [x] Both replay buttons are disabled while the tutor is thinking or speaking and hidden when there is no audio.
 - [ ] Every tutor line with a non-empty `reply_pl`, including the greeting, has a working "przetłumacz" toggle; lines with an empty one have no toggle.
 - [ ] For A1–A2 the translation is unfolded by default, for B1–C2 folded.
 - [ ] `reply_pl` is never spoken and never sent back to the model.
@@ -178,3 +178,4 @@ Profile, new field (default `auto`):
 | 2026-10-29 | Document created. |
 | 2026-10-29 | Accepted; open questions resolved with the default answers, each checked in its stage. |
 | 2026-10-29 | Stage 1 implemented: `speech_language` in the profile and the profile form, `language="en"` passed to transcription. |
+| 2026-10-29 | Stage 2 implemented: "wolniej" replays the last reply at 0.75× in the browser. |

@@ -25,6 +25,7 @@ const TEXT = {
 };
 const MIN_RECORDING_MS = 500;
 const MAX_RECORDING_MS = 60_000;
+const SLOW_RATE = 0.75;
 const views = ["start-view", "profile-view", "chat-view", "summary-view"];
 const player = new Audio();
 
@@ -222,6 +223,7 @@ function setBusy(value) {
   $("status").textContent = busy ? TEXT.thinking : TEXT.speaking;
   $("mic").disabled = busy || speaking;
   $("repeat").disabled = busy || speaking;
+  $("slower").disabled = busy || speaking;
   $("text-form").querySelectorAll("input, button").forEach((el) => (el.disabled = busy));
   document.querySelectorAll("#start-view button, #end-session, #new-session").forEach((el) => (el.disabled = busy));
 }
@@ -231,8 +233,9 @@ function setSpeaking(value) {
   setBusy(busy);
 }
 
-async function playReply() {
+async function playReply(rate = 1) {
   player.currentTime = 0;
+  player.playbackRate = rate;
   setSpeaking(true);
   try {
     await player.play();
@@ -250,6 +253,7 @@ function speak(audio) {
   if (audio) player.src = `data:audio/mpeg;base64,${audio}`;
   else player.removeAttribute("src");
   $("repeat").hidden = !audio;
+  $("slower").hidden = !audio;
   if (audio) playReply();
 }
 
@@ -447,7 +451,8 @@ window.addEventListener("pagehide", () => {
 });
 $("end-session").onclick = guarded(endSession);
 $("summary-new").onclick = () => show("start-view");
-$("repeat").onclick = guarded(playReply);
+$("repeat").onclick = guarded(() => playReply());
+$("slower").onclick = guarded(() => playReply(SLOW_RATE));
 player.onended = () => setSpeaking(false);
 player.onerror = () => setSpeaking(false);
 $("mic").onpointerdown = guarded(startRecording);
