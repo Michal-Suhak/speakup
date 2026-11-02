@@ -33,7 +33,7 @@ def calls(monkeypatch):
         recorded.append((instructions, list(messages), text_format))
         if text_format is Summary:
             return SUMMARY
-        return TutorTurn(analysis="", corrections=[], reply="Where?")
+        return TutorTurn(analysis="", corrections=[], reply="Where?", reply_pl="Po polsku.")
 
     monkeypatch.setattr(llm, "_ask", fake_ask)
     return recorded

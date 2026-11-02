@@ -25,7 +25,7 @@ def test_cost_uses_config_rates(monkeypatch):
 
 
 def test_chat_usage_and_timing_are_recorded(monkeypatch, caplog):
-    turn = TutorTurn(analysis="", corrections=[], reply="Hi?")
+    turn = TutorTurn(analysis="", corrections=[], reply="Hi?", reply_pl="Po polsku.")
     raw = obj(text=json.dumps({"usage": {"input_tokens": 120, "output_tokens": 30}}), parse=lambda: obj(output_parsed=turn))
     responses = obj(with_raw_response=obj(parse=lambda **kwargs: raw))
     monkeypatch.setattr(llm, "get_client", lambda: obj(responses=responses))

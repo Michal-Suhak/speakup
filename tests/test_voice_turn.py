@@ -22,7 +22,7 @@ def isolated(tmp_path, monkeypatch):
         corrections = []
         if messages[-1].content == "I go there yesterday":
             corrections = [Correction(you_said="I go", better="I went", mistake_type="grammar", severity="important", explanation_pl="Czas przeszły.")]
-        return TutorTurn(analysis="Notes.", corrections=corrections, reply="Nice?")
+        return TutorTurn(analysis="Notes.", corrections=corrections, reply="Nice?", reply_pl="Po polsku.")
 
     monkeypatch.setattr(llm, "_ask", fake_ask)
 
@@ -68,6 +68,7 @@ def test_voice_turn(client, session_id, transcriptions):
     assert response.json() == {
         "user_text": "I go there yesterday",
         "reply": "Nice?",
+        "reply_pl": "Po polsku.",
         "corrections": [{"you_said": "I go", "better": "I went", "explanation_pl": "Czas przeszły."}],
         "audio": "SUQzIGZha2UgbXAz",
     }
