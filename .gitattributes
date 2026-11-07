@@ -1,0 +1,2 @@
+# cmd needs CRLF, also when the file is downloaded raw from GitHub
+start.cmd -text
