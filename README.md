@@ -10,6 +10,14 @@ A local tutor for practising spoken English. You talk to it by voice, it answers
 - [uv](https://docs.astral.sh/uv/) (it installs a matching Python version itself)
 - an OpenAI API key ([platform.openai.com](https://platform.openai.com/api-keys)); the API is billed separately from ChatGPT, so set a spending limit on your account
 
+## Windows: one click
+
+1. Download [start.cmd](https://github.com/Michal-Suhak/speakup/raw/main/start.cmd) and save it on the desktop.
+2. Double-click it. If Windows shows "Windows protected your PC", click "More info" → "Run anyway".
+3. The first start installs uv and Python (a few minutes) and asks for the OpenAI key once. Then the browser opens SpeakUp.
+
+Every start downloads the latest version from GitHub into `%USERPROFILE%\SpeakUp`; the key (`.env`) and the profiles stay. Close the black window to stop SpeakUp. A wrong key is rejected at the first start; to change the key later, delete `%USERPROFILE%\SpeakUp\.env` and start again.
+
 ## Installation
 
 1. Install uv (macOS / Linux):
