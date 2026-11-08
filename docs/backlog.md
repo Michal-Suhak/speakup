@@ -8,20 +8,15 @@ The backlog changes only through PRs, like everything on `main`. New ideas can b
 
 ## Product
 
-- **Session history and progress** – save finished sessions and show progress over time, in the database from the [online deployment draft](specs/online-deployment.md) (SQLite if that draft is rejected).
+- **Progress screen** – practice time, sessions per week and common mistakes, built on the saved sessions from [0004](specs/0004-session-history.md).
 - **Admin panel in the browser** – accounts, limits and usage without the terminal commands from the online deployment draft, for when there are more learners.
-- **Cleanup of abandoned sessions** – end sessions after e.g. 30 minutes without activity and log their cost, for when the browser's end call never arrives.
 - **Memory for long conversations** – summarise older turns instead of cutting the history at the last 40 messages.
 
 ## Teaching
 
 - **Vocabulary list with spaced repetition** – collect useful words from summaries, review them later and bring them back into conversations.
 - **Recurring mistakes across sessions** – detect mistakes the learner keeps making and practise them.
-- **Self-correction first** – for an important mistake, give a hint and let the learner fix it before showing the correct form.
-- **Roleplay scenes** – restaurant, hotel, airport, job interview.
 - **Pronunciation assessment**
-- **Listening mode** – hide the tutor's text until the learner clicks, to practise understanding by ear.
-- **"Jak powiedzieć…?"** – ask in Polish how to say a word during the conversation, without leaving the topic.
 
 ## Voice and speed
 
