@@ -166,8 +166,8 @@ An unknown `scene` returns 422. Without `scene` the session works as today.
 - [x] Tests: idle session removed and logged, busy session kept, active session kept.
 
 **Stage 3 – listening mode**
-- [ ] Switch, hidden lines with "pokaż tekst", hint.
-- [ ] Manual check with voice and with the translation toggle.
+- [x] Switch, hidden lines with "pokaż tekst", hint.
+- [x] Manual check with voice and with the translation toggle.
 
 **Stage 4 – scenes**
 - [ ] `prompts/scenes/*.md`, `$scene` section, `StartRequest.scene` with validation.
@@ -184,7 +184,7 @@ An unknown `scene` returns 422. Without `scene` the session works as today.
 - [ ] Every control listed in the hint table has an (i) that opens on hover, tap and keyboard focus, closes on Esc and outside click, and fits a 360 px wide screen.
 - [x] A session idle for more than 30 minutes is removed on the next request and one log line with its cost is written; a busy session is never removed.
 - [x] The next message to an expired session shows the new expired message.
-- [ ] With listening mode on, new tutor lines are hidden until "pokaż tekst"; switching it off shows all lines.
+- [x] With listening mode on, new tutor lines are hidden until "pokaż tekst"; switching it off shows all lines.
 - [ ] Each scene starts with the tutor in role; corrections still appear.
 - [ ] An unknown scene id is rejected with 422.
 - [ ] "jak powiedzieć X?" gets the English phrase with an example and no correction.
@@ -203,3 +203,4 @@ An unknown `scene` returns 422. Without `scene` the session works as today.
 | 2026-11-08 | Accepted; open questions resolved with the proposed answers. |
 | 2026-11-08 | Stage 1 implemented: (i) hints on the existing controls; profile form fields use a `.field` wrapper so the (i) sits outside the `<label>` (a button inside a label would become its labelled control); the text field hint has only its first sentence until stage 5. |
 | 2026-11-08 | Stage 2 implemented: sessions idle for more than 30 minutes are removed on the next request and logged with their cost; new expired message. |
+| 2026-11-08 | Stage 3 implemented: "ukryj tekst tutora" switch hides new tutor lines behind "pokaż tekst"; switching it off reveals all. |
