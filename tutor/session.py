@@ -50,6 +50,7 @@ class Usage:
 class Session:
     profile: Profile
     topic: str
+    scene: str | None = None
     id: str = field(default_factory=lambda: uuid.uuid4().hex)
     messages: list[Message] = field(default_factory=list)
     started: float = field(default_factory=time.monotonic)

@@ -24,8 +24,9 @@ MAX_OUTPUT_TOKENS = 2000
 PARSE_ATTEMPTS = 2
 START_INSTRUCTION = (
     "Start the session: greet the learner by name in one short sentence "
-    "and ask your first question about the session topic."
+    "and ask your first question about the session topic. If a scene is set, open it in your role instead."
 )
+SCENES = ("restaurant", "hotel", "airport", "job-interview", "doctor", "shop")
 SUMMARY_INSTRUCTION = "The session has ended. Write the summary of the whole conversation above."
 Answer = TypeVar("Answer", TutorTurn, Summary)
 
@@ -42,6 +43,12 @@ def _join(values: list[str]) -> str:
     return ", ".join(values) or "none"
 
 
+def _scene_text(scene: str | None) -> str:
+    if scene is None:
+        return "none"
+    return (PROMPTS_DIR / "scenes" / f"{scene}.md").read_text(encoding="utf-8").strip()
+
+
 def render_system_prompt(session: Session) -> str:
     profile = session.profile
     template = Template((PROMPTS_DIR / "tutor.md").read_text(encoding="utf-8"))
@@ -53,6 +60,7 @@ def render_system_prompt(session: Session) -> str:
         goals=profile.goals or "none",
         avoid_topics=_join(profile.avoid_topics),
         correction_style=profile.correction_style,
+        scene=_scene_text(session.scene),
     )
 
 

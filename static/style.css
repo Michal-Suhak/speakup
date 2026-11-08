@@ -141,6 +141,8 @@ button.link:hover { color: var(--pen); background: none; }
   transition: box-shadow 0.12s;
 }
 
+.scenes-title { margin: 0; color: var(--pencil); font-style: italic; }
+
 .topics button::after { content: " /"; color: var(--rule); }
 .topics button:last-child::after { content: ""; }
 

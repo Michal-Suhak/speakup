@@ -66,6 +66,33 @@ def test_prompt_uses_profile_and_keeps_braces():
     assert prompt.index("<learner_profile>") < prompt.index("Name: Kasia") < prompt.index("</learner_profile>")
 
 
+def test_prompt_without_scene_says_none():
+    prompt = llm.render_system_prompt(Session(profile=profiles.load_profile("michal"), topic="Travel"))
+    assert "# Scene\n\nnone\n" in prompt
+
+
+@pytest.mark.parametrize("scene", llm.SCENES)
+def test_every_scene_has_a_prompt(scene):
+    prompt = llm.render_system_prompt(Session(profile=profiles.load_profile("michal"), topic="Scene", scene=scene))
+    assert "Play a" in prompt.split("# Scene")[1].split("# Corrections")[0]
+
+
+def test_start_with_scene_puts_the_role_in_the_prompt(client, calls):
+    response = client.post("/api/session", json={"profile_id": "michal", "topic": "At a restaurant", "scene": "restaurant"})
+
+    assert response.status_code == 200
+    assert "Play a waiter" in calls[0][0]
+    assert session.get_session(response.json()["session_id"]).scene == "restaurant"
+
+
+@pytest.mark.parametrize("scene", ["pub", "../tutor", ""])
+def test_unknown_scene_is_422(client, calls, scene):
+    response = client.post("/api/session", json={"profile_id": "michal", "topic": "X", "scene": scene})
+
+    assert response.status_code == 422
+    assert calls == []
+
+
 def test_prompt_joins_lists():
     profile = profiles.load_profile("michal")
     prompt = llm.render_system_prompt(Session(profile=profile, topic="Travel"))

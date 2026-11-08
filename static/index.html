@@ -28,6 +28,15 @@
       <div id="topic-box" hidden>
         <h2><span class="step">2</span> O czym rozmawiamy? <span class="help"><button type="button" class="info" aria-label="Wyjaśnienie" aria-expanded="false" aria-describedby="tip-topics">i</button><span class="tip" role="tooltip" id="tip-topics">Wybierz temat i po prostu rozmawiaj. Możesz też wpisać własny.</span></span></h2>
         <div id="topics" class="topics"></div>
+        <p class="scenes-title">Scenki <span class="help"><button type="button" class="info" aria-label="Wyjaśnienie" aria-expanded="false" aria-describedby="tip-scenes">i</button><span class="tip" role="tooltip" id="tip-scenes">Tutor gra rolę, np. kelnera, a ty ćwiczysz prawdziwą sytuację.</span></span></p>
+        <div id="scenes" class="topics">
+          <button type="button" data-scene="restaurant" data-topic="At a restaurant">W restauracji</button>
+          <button type="button" data-scene="hotel" data-topic="At a hotel">W hotelu</button>
+          <button type="button" data-scene="airport" data-topic="At the airport">Na lotnisku</button>
+          <button type="button" data-scene="job-interview" data-topic="Job interview">Rozmowa o pracę</button>
+          <button type="button" data-scene="doctor" data-topic="At the doctor's">U lekarza</button>
+          <button type="button" data-scene="shop" data-topic="In a clothes shop">W sklepie</button>
+        </div>
         <form id="start-form" class="row">
           <input id="topic" placeholder="własny temat, np. my last weekend" maxlength="80" required>
           <button type="submit">Zaczynamy</button>
