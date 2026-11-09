@@ -305,12 +305,12 @@ function stopSpeaking() {
   setSpeaking(false);
 }
 
-async function startSession(topic) {
+async function startSession(topic, scene = null, title = topic) {
   setBusy(true);
   try {
-    const data = await api("POST", "/api/session", { profile_id: current.id, topic });
+    const data = await api("POST", "/api/session", { profile_id: current.id, topic, scene });
     sessionId = data.session_id;
-    $("chat-topic").textContent = topic;
+    $("chat-topic").textContent = title;
     $("transcript").replaceChildren();
     show("chat-view");
     addReply(data);
@@ -511,6 +511,9 @@ $("start-form").onsubmit = guarded((event) => {
   return startSession($("topic").value.trim());
 });
 $("text-form").onsubmit = guarded(sendText);
+document.querySelectorAll("#scenes button").forEach((button) => {
+  button.onclick = guarded(() => startSession(button.dataset.topic, button.dataset.scene, button.textContent));
+});
 $("new-session").onclick = guarded(leaveSession);
 window.addEventListener("pagehide", () => {
   if (sessionId) navigator.sendBeacon(`/api/session/${sessionId}/end?summary=false`);

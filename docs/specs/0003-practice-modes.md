@@ -49,7 +49,7 @@ A learner who has never seen the app understands every control from short Polish
 - `static/index.html`, `static/style.css`, `static/app.js` – hint markup and behaviour, listening switch, scene buttons, new texts.
 - `tutor/session.py` – `last_active` on `Session`, refreshed by `turn()`; `expire_idle_sessions()` removes sessions idle for more than `config.SESSION_IDLE_MINUTES` (default 30, set in `.env`) and not busy, logging id, idle minutes and cost; called from `register_session` and `get_session`, so no background thread is needed.
 - `api/sessions.py` – `StartRequest.scene` (optional); the start endpoint checks it against the known scenes.
-- `prompts/scenes/<id>.md` – one file per scene with the role and situation in English.
+- `prompts/scenes/<id>.md` – one file per scene with the role and situation in English; the file names are the list of known scenes (`llm.SCENES`), and a test checks that the buttons in `index.html` match them. How to add a scene: README.
 - `prompts/tutor.md` – a `$scene` section and a "Jak powiedzieć" rule.
 - `tutor/llm.py` – renders the scene text (or "none") into the system prompt.
 
@@ -117,7 +117,7 @@ An unknown `scene` returns 422. Without `scene` the session works as today.
   # Scene
   $scene
   ```
-  With a scene: "Play this role: … Stay in the role, keep the situation realistic, and still follow the correction rules." Without: "none – a free conversation on the session topic."
+  With a scene, `$scene` is the scene file; without one it is "none", and the section says that "none" means a free conversation on the session topic, so no prompt text lives in Python. The section asks the tutor to stay in role, keep the situation realistic and keep following the correction rules. `START_INSTRUCTION` asks to open the scene in role when one is set.
 - `prompts/scenes/*.md`: role, setting and what the learner should practise (e.g. ordering, asking for the bill), 3–5 lines each.
 - New rule in "Rules": when the learner asks in Polish how to say something ("jak powiedzieć…", "jak jest po angielsku…"), give the natural English word or phrase with one short example sentence and go back to the topic; such a question is not a mistake and gets no correction.
 - The scene and the question are data from a closed list or from the learner; the learner's text stays in the message, never in the instructions.
@@ -149,7 +149,7 @@ An unknown `scene` returns 422. Without `scene` the session works as today.
 
 ## 8. Risks and open questions
 
-- [x] Corrections in scenes: expected to keep working, since the scene section repeats the correction rules; checked by hand on two scenes in stage 4.
+- [x] Corrections in scenes: checked in stage 4 on the restaurant and job interview scenes (6 turns): the tutor stayed in role and every learner mistake got a correction.
 - [x] "jak powiedzieć…" as a `polish_word` mistake: prevented by the prompt rule; checked in stage 5, and if it still happens the rule moves into the `corrections` field description too.
 - Risk: tooltips cover the control below them on small phones. Mitigated by max width and placement above the (i) when there is no room below.
 
@@ -170,10 +170,10 @@ An unknown `scene` returns 422. Without `scene` the session works as today.
 - [x] Manual check with voice and with the translation toggle.
 
 **Stage 4 – scenes**
-- [ ] `prompts/scenes/*.md`, `$scene` section, `StartRequest.scene` with validation.
-- [ ] Scene buttons and hint on the start screen.
-- [ ] Tests: prompt renders the scene and "none", unknown scene is 422.
-- [ ] Manual check of two scenes.
+- [x] `prompts/scenes/*.md`, `$scene` section, `StartRequest.scene` with validation.
+- [x] Scene buttons and hint on the start screen.
+- [x] Tests: prompt renders the scene and "none", unknown scene is 422.
+- [x] Manual check of two scenes.
 
 **Stage 5 – "Jak powiedzieć…?"**
 - [ ] Prompt rule, text field hint.
@@ -185,8 +185,8 @@ An unknown `scene` returns 422. Without `scene` the session works as today.
 - [x] A session idle for more than 30 minutes is removed on the next request and one log line with its cost is written; a busy session is never removed.
 - [x] The next message to an expired session shows the new expired message.
 - [x] With listening mode on, new tutor lines are hidden until "pokaż tekst"; switching it off shows all lines.
-- [ ] Each scene starts with the tutor in role; corrections still appear.
-- [ ] An unknown scene id is rejected with 422.
+- [x] Each scene starts with the tutor in role; corrections still appear.
+- [x] An unknown scene id is rejected with 422.
 - [ ] "jak powiedzieć X?" gets the English phrase with an example and no correction.
 
 ## 11. Tests and evaluation
@@ -205,3 +205,5 @@ An unknown `scene` returns 422. Without `scene` the session works as today.
 | 2026-11-08 | Stage 2 implemented: sessions idle for more than 30 minutes are removed on the next request and logged with their cost; new expired message. |
 | 2026-11-08 | Stage 3 implemented: "ukryj tekst tutora" switch hides new tutor lines behind "pokaż tekst"; switching it off reveals all. |
 | 2026-11-09 | Review change: the idle limit moved to `SESSION_IDLE_MINUTES` in `config.py` / `.env` (default 30); the app refuses to start with a non-positive or non-numeric value. |
+| 2026-11-08 | Stage 4 implemented: six scenes in `prompts/scenes/`, `scene` in the start request (closed list, 422 otherwise), scene buttons on the start screen; the scene section renders "none" without a scene. |
+| 2026-11-09 | Review change: the scene list is read from the file names in `prompts/scenes/` instead of a constant; a test checks the scene buttons against the files; README describes how to add a scene. |

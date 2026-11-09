@@ -2,7 +2,7 @@ import base64
 import logging
 import time
 from dataclasses import asdict
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Form, HTTPException, UploadFile
 from pydantic import BaseModel, Field, StringConstraints
@@ -24,6 +24,7 @@ class StartRequest(BaseModel):
 
     profile_id: str = Field(examples=["michal"])
     topic: Topic = Field(description="Topic of the conversation, 1-80 characters.", examples=["Travel"])
+    scene: Literal[llm.SCENES] | None = Field(None, description="Roleplay scene; the tutor plays its role.", examples=["restaurant"])
 
 
 class StartResponse(BaseModel):
@@ -86,7 +87,7 @@ def start_session(request: StartRequest) -> StartResponse:
     profile = load_profile(request.profile_id)
     if profile is None:
         raise HTTPException(404, "Profile not found.")
-    session = Session(profile=profile, topic=request.topic)
+    session = Session(profile=profile, topic=request.topic, scene=request.scene)
     turn = llm.start(session)
     reply_audio = speak(session, turn.reply)
     register_session(session)
