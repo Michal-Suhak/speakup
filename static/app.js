@@ -3,7 +3,7 @@ const $ = (id) => document.getElementById(id);
 const TEXT = {
   invalidFields: (fields) => `Nieprawidłowe dane w polach: ${fields}.`,
   tutorBusy: "Tutor jeszcze odpowiada, poczekaj chwilę.",
-  sessionExpired: "Sesja wygasła (serwer był restartowany). Kliknij „nowa rozmowa”.",
+  sessionExpired: "Ta rozmowa wygasła po dłuższej przerwie. Kliknij „nowa rozmowa”.",
   httpError: (status, detail) => `Błąd (${status}): ${detail}`,
   noConnection: "Brak połączenia z serwerem. Czy aplikacja jest uruchomiona?",
   noFreeId: "Nie udało się nadać id profilu, wpisz inne imię.",

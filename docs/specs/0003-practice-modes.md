@@ -47,7 +47,7 @@ A learner who has never seen the app understands every control from short Polish
 ### Architecture and flow
 
 - `static/index.html`, `static/style.css`, `static/app.js` – hint markup and behaviour, listening switch, scene buttons, new texts.
-- `tutor/session.py` – `last_active` on `Session`, refreshed by `turn()`; `expire_idle_sessions()` removes sessions idle for more than `SESSION_IDLE_MINUTES = 30` and not busy, logging id, idle minutes and cost; called from `register_session` and `get_session`, so no background thread is needed.
+- `tutor/session.py` – `last_active` on `Session`, refreshed by `turn()`; `expire_idle_sessions()` removes sessions idle for more than `config.SESSION_IDLE_MINUTES` (default 30, set in `.env`) and not busy, logging id, idle minutes and cost; called from `register_session` and `get_session`, so no background thread is needed.
 - `api/sessions.py` – `StartRequest.scene` (optional); the start endpoint checks it against the known scenes.
 - `prompts/scenes/<id>.md` – one file per scene with the role and situation in English.
 - `prompts/tutor.md` – a `$scene` section and a "Jak powiedzieć" rule.
@@ -136,7 +136,7 @@ An unknown `scene` returns 422. Without `scene` the session works as today.
 | Tooltip mechanism | Own (i) button + CSS, tap toggles, small JS for click and Esc | `title` attribute; a tooltip library | `title` does not work on touch, shows late and is not read reliably by screen readers; a library adds a dependency and a build step. |
 | Where hints go | Only on controls whose label is not self-explanatory | (i) on every control | Too many icons are noise; a clear label needs no hint. |
 | Session cleanup trigger | Check idle sessions on every register and lookup | Background timer thread | No extra thread or scheduler; with one user the check is free. |
-| Idle limit | 30 minutes, constant in `session.py` | Setting in `.env` | A value that never changes does not need config. |
+| Idle limit | `SESSION_IDLE_MINUTES` in `.env`, default 30, checked at startup | Constant in `session.py` | The limit can be tuned without code changes, like the other settings in `config.py`. |
 | Scenes source | Fixed list, prompt per scene in `prompts/scenes/` | Free-text scenes; LLM-generated scenes | Predictable roles and testable prompts; the custom topic already covers free practice. |
 | "Jak powiedzieć…?" | Prompt rule inside the normal turn | Separate button and API call | No extra cost, no new endpoint; works by text and by voice. |
 | Listening mode state | Switch kept until the page is reloaded | Profile field | A practice choice per sitting, not a learner setting; keeps the profile format unchanged. |
@@ -161,9 +161,9 @@ An unknown `scene` returns 422. Without `scene` the session works as today.
 - [x] Manual check: mouse, keyboard (Tab, Esc), phone width in the browser.
 
 **Stage 2 – session cleanup**
-- [ ] `last_active`, `expire_idle_sessions()`, log line.
-- [ ] New expired-session message.
-- [ ] Tests: idle session removed and logged, busy session kept, active session kept.
+- [x] `last_active`, `expire_idle_sessions()`, log line.
+- [x] New expired-session message.
+- [x] Tests: idle session removed and logged, busy session kept, active session kept.
 
 **Stage 3 – listening mode**
 - [ ] Switch, hidden lines with "pokaż tekst", hint.
@@ -182,8 +182,8 @@ An unknown `scene` returns 422. Without `scene` the session works as today.
 ## 10. Acceptance criteria
 
 - [ ] Every control listed in the hint table has an (i) that opens on hover, tap and keyboard focus, closes on Esc and outside click, and fits a 360 px wide screen.
-- [ ] A session idle for more than 30 minutes is removed on the next request and one log line with its cost is written; a busy session is never removed.
-- [ ] The next message to an expired session shows the new expired message.
+- [x] A session idle for more than 30 minutes is removed on the next request and one log line with its cost is written; a busy session is never removed.
+- [x] The next message to an expired session shows the new expired message.
 - [ ] With listening mode on, new tutor lines are hidden until "pokaż tekst"; switching it off shows all lines.
 - [ ] Each scene starts with the tutor in role; corrections still appear.
 - [ ] An unknown scene id is rejected with 422.
@@ -202,3 +202,5 @@ An unknown `scene` returns 422. Without `scene` the session works as today.
 | 2026-11-08 | Document created. |
 | 2026-11-08 | Accepted; open questions resolved with the proposed answers. |
 | 2026-11-08 | Stage 1 implemented: (i) hints on the existing controls; profile form fields use a `.field` wrapper so the (i) sits outside the `<label>` (a button inside a label would become its labelled control); the text field hint has only its first sentence until stage 5. |
+| 2026-11-08 | Stage 2 implemented: sessions idle for more than 30 minutes are removed on the next request and logged with their cost; new expired message. |
+| 2026-11-09 | Review change: the idle limit moved to `SESSION_IDLE_MINUTES` in `config.py` / `.env` (default 30); the app refuses to start with a non-positive or non-numeric value. |
