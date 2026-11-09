@@ -17,6 +17,7 @@ from tutor.session import Message, Session, Usage
 
 log = logging.getLogger(__name__)
 PROMPTS_DIR = config.BASE_DIR / "prompts"
+SCENES = tuple(sorted(path.stem for path in (PROMPTS_DIR / "scenes").glob("*.md")))
 # ponytail: plain sliding window; summarise older turns if long sessions lose context
 MAX_HISTORY_MESSAGES = 40
 REQUEST_TIMEOUT_SECONDS = 30
@@ -26,7 +27,6 @@ START_INSTRUCTION = (
     "Start the session: greet the learner by name in one short sentence "
     "and ask your first question about the session topic. If a scene is set, open it in your role instead."
 )
-SCENES = ("restaurant", "hotel", "airport", "job-interview", "doctor", "shop")
 SUMMARY_INSTRUCTION = "The session has ended. Write the summary of the whole conversation above."
 Answer = TypeVar("Answer", TutorTurn, Summary)
 

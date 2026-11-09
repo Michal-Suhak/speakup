@@ -1,4 +1,5 @@
 import json
+import re
 import threading
 
 import openai
@@ -6,6 +7,7 @@ import openai
 import pytest
 from fastapi.testclient import TestClient
 
+import config
 from app import app
 from tutor import llm, profiles, session
 from tutor.llm import LLMError, LLMUnavailable
@@ -69,6 +71,11 @@ def test_prompt_uses_profile_and_keeps_braces():
 def test_prompt_without_scene_says_none():
     prompt = llm.render_system_prompt(Session(profile=profiles.load_profile("michal"), topic="Travel"))
     assert "# Scene\n\nnone\n" in prompt
+
+
+def test_scene_buttons_match_scene_files():
+    html = (config.BASE_DIR / "static" / "index.html").read_text(encoding="utf-8")
+    assert sorted(re.findall(r'data-scene="([^"]+)"', html)) == list(llm.SCENES)
 
 
 @pytest.mark.parametrize("scene", llm.SCENES)
