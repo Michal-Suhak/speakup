@@ -26,6 +26,10 @@ LEVELS = ("A1", "A2", "B1", "B2", "C1", "C2")
 DEFAULT_LEVEL = os.getenv("DEFAULT_LEVEL", "B1")
 if DEFAULT_LEVEL not in LEVELS:
     sys.exit(f"DEFAULT_LEVEL in .env must be one of {', '.join(LEVELS)}, got {DEFAULT_LEVEL!r}.")
+_idle_minutes = os.getenv("SESSION_IDLE_MINUTES", "30")
+if not _idle_minutes.isdigit() or int(_idle_minutes) < 1:
+    sys.exit(f"SESSION_IDLE_MINUTES in .env must be a whole number of minutes above 0, got {_idle_minutes!r}.")
+SESSION_IDLE_MINUTES = int(_idle_minutes)
 
 
 def require_api_key() -> str:

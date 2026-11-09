@@ -18,7 +18,7 @@
 
 - Python 3.11+, type hints on public functions, `X | None` instead of `Optional[X]`.
 - Dependencies only through uv: `uv add` / `uv remove`, commit `pyproject.toml` and `uv.lock` together, run scripts and tests with `uv run`. No `pip install`, no `requirements.txt`.
-- Pydantic models for structured LLM output and session state. `Field(default_factory=...)` for lists and dicts.
+- Pydantic models for data that crosses a boundary: structured LLM output, files, requests, JSON. Dataclasses for state that lives only in memory (`Session`). Data saved to disk gets its own Pydantic model, never a dump of `Session`. Mutable defaults always through `default_factory`.
 - One OpenAI client per process, created in one place.
 - Config through `config.py` reading `.env`. Fail fast with a clear message when the key is missing.
 - Handle errors at boundaries (endpoints, API calls): return a clear error to the frontend, do not swallow exceptions silently.
