@@ -3,11 +3,12 @@ import threading
 
 import pytest
 
+import config
 from tutor import session
 from tutor.profiles import Profile
-from tutor.session import SESSION_IDLE_MINUTES, Session, SessionNotFound, get_session, register_session
+from tutor.session import Session, SessionNotFound, get_session, register_session
 
-IDLE_SECONDS = SESSION_IDLE_MINUTES * 60
+IDLE_SECONDS = config.SESSION_IDLE_MINUTES * 60
 
 
 @pytest.fixture(autouse=True)
