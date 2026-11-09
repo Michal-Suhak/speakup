@@ -150,7 +150,7 @@ An unknown `scene` returns 422. Without `scene` the session works as today.
 ## 8. Risks and open questions
 
 - [x] Corrections in scenes: checked in stage 4 on the restaurant and job interview scenes (6 turns): the tutor stayed in role and every learner mistake got a correction.
-- [x] "jak powiedzieć…" as a `polish_word` mistake: prevented by the prompt rule; checked in stage 5, and if it still happens the rule moves into the `corrections` field description too.
+- [x] "jak powiedzieć…" as a `polish_word` mistake: checked in stage 5 on three typed questions (free topic and restaurant scene): none got a correction, while a real mistake in the same message still did, so the rule stays in the prompt only.
 - Risk: tooltips cover the control below them on small phones. Mitigated by max width and placement above the (i) when there is no room below.
 
 ## 9. Implementation plan
@@ -176,18 +176,18 @@ An unknown `scene` returns 422. Without `scene` the session works as today.
 - [x] Manual check of two scenes.
 
 **Stage 5 – "Jak powiedzieć…?"**
-- [ ] Prompt rule, text field hint.
+- [x] Prompt rule, text field hint.
 - [ ] Manual check by text and voice.
 
 ## 10. Acceptance criteria
 
-- [ ] Every control listed in the hint table has an (i) that opens on hover, tap and keyboard focus, closes on Esc and outside click, and fits a 360 px wide screen.
+- [x] Every control listed in the hint table has an (i) that opens on hover, tap and keyboard focus, closes on Esc and outside click, and fits a 360 px wide screen.
 - [x] A session idle for more than 30 minutes is removed on the next request and one log line with its cost is written; a busy session is never removed.
 - [x] The next message to an expired session shows the new expired message.
 - [x] With listening mode on, new tutor lines are hidden until "pokaż tekst"; switching it off shows all lines.
 - [x] Each scene starts with the tutor in role; corrections still appear.
 - [x] An unknown scene id is rejected with 422.
-- [ ] "jak powiedzieć X?" gets the English phrase with an example and no correction.
+- [x] "jak powiedzieć X?" gets the English phrase with an example and no correction.
 
 ## 11. Tests and evaluation
 
@@ -207,3 +207,4 @@ An unknown `scene` returns 422. Without `scene` the session works as today.
 | 2026-11-09 | Review change: the idle limit moved to `SESSION_IDLE_MINUTES` in `config.py` / `.env` (default 30); the app refuses to start with a non-positive or non-numeric value. |
 | 2026-11-08 | Stage 4 implemented: six scenes in `prompts/scenes/`, `scene` in the start request (closed list, 422 otherwise), scene buttons on the start screen; the scene section renders "none" without a scene. |
 | 2026-11-09 | Review change: the scene list is read from the file names in `prompts/scenes/` instead of a constant; a test checks the scene buttons against the files; README describes how to add a scene. |
+| 2026-11-08 | Stage 5 implemented: "jak powiedzieć…" rule in `prompts/tutor.md`, second sentence of the text field hint. All 15 hints checked at 360 px. Voice check of the question still open. |
