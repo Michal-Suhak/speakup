@@ -10,7 +10,6 @@ import config
 from tutor.profiles import Profile
 
 log = logging.getLogger(__name__)
-SESSION_IDLE_MINUTES = 30
 
 
 class SessionNotFound(Exception):
@@ -74,11 +73,11 @@ _sessions: dict[str, Session] = {}
 
 
 def expire_idle_sessions() -> None:
-    """Remove sessions idle for longer than SESSION_IDLE_MINUTES, e.g. when the browser never sent the end call."""
+    """Remove sessions idle for longer than config.SESSION_IDLE_MINUTES, e.g. when the browser never sent the end call."""
     now = time.monotonic()
     for session in list(_sessions.values()):
         idle_minutes = (now - session.last_active) / 60
-        if idle_minutes <= SESSION_IDLE_MINUTES or not session._lock.acquire(blocking=False):
+        if idle_minutes <= config.SESSION_IDLE_MINUTES or not session._lock.acquire(blocking=False):
             continue
         try:
             _sessions.pop(session.id, None)
