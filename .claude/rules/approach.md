@@ -15,7 +15,7 @@
 - **Build in layers**: text conversation first, then STT, then TTS. Each layer testable on its own.
 - **Context is selected, not collected.** Send only what the turn needs: system prompt, settings, recent messages. Summarise or trim long history instead of sending everything.
 - **Thin wrappers.** `stt.py`, `llm.py`, `tts.py` are small functions over the SDK, so providers and models can be swapped via config.
-- **State is explicit.** Session state is a typed object (topic, level, history). Use `Field(default_factory=list)` for mutable defaults.
+- **State is explicit.** Session state is a typed dataclass in memory (topic, level, history). Use `field(default_factory=list)` for mutable defaults.
 
 ## Tutor behaviour (product rules)
 
