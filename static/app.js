@@ -247,8 +247,8 @@ function setBusy(value) {
   $("mic").disabled = busy || speaking;
   $("repeat").disabled = busy || speaking;
   $("slower").disabled = busy || speaking;
-  $("text-form").querySelectorAll("input, button").forEach((el) => (el.disabled = busy));
-  document.querySelectorAll("#start-view button, #end-session, #new-session").forEach((el) => (el.disabled = busy));
+  $("text-form").querySelectorAll("input, button:not(.info)").forEach((el) => (el.disabled = busy));
+  document.querySelectorAll("#start-view button:not(.info), #end-session, #new-session").forEach((el) => (el.disabled = busy));
 }
 
 function setSpeaking(value) {
@@ -277,6 +277,7 @@ function speak(audio) {
   else player.removeAttribute("src");
   $("repeat").hidden = !audio;
   $("slower").hidden = !audio;
+  $("replay-help").hidden = !audio;
   if (audio) playReply();
 }
 
@@ -440,6 +441,32 @@ function releaseMicrophone() {
   stream = null;
 }
 
+function placeTip(help) {
+  const tip = help.querySelector(".tip");
+  tip.style.left = "0px";
+  tip.classList.remove("above");
+  const box = tip.getBoundingClientRect();
+  const overflow = box.right - (document.documentElement.clientWidth - 8);
+  if (overflow > 0) tip.style.left = `${-Math.min(overflow, box.left - 8)}px`;
+  if (box.bottom > window.innerHeight - 8 && box.top - box.height > 16) tip.classList.add("above");
+}
+
+function closeHelps(except) {
+  document.querySelectorAll(".help.open").forEach((help) => {
+    if (help === except) return;
+    help.classList.remove("open");
+    help.querySelector(".info").setAttribute("aria-expanded", "false");
+  });
+}
+
+function toggleHelp(help) {
+  closeHelps(help);
+  const open = help.classList.toggle("open");
+  help.classList.remove("dismissed");
+  help.querySelector(".info").setAttribute("aria-expanded", String(open));
+  if (open) placeTip(help);
+}
+
 function isTyping(event) {
   return event.target.matches("input, textarea, select");
 }
@@ -488,6 +515,22 @@ document.addEventListener("keyup", (event) => {
   stopRecording();
 });
 window.addEventListener("blur", stopRecording);
+document.querySelectorAll(".help").forEach((help) => {
+  help.addEventListener("pointerenter", () => placeTip(help));
+  help.addEventListener("focusin", () => placeTip(help));
+  help.addEventListener("pointerleave", () => help.classList.remove("dismissed"));
+  help.addEventListener("focusout", () => help.classList.remove("dismissed"));
+});
+document.addEventListener("click", (event) => {
+  const help = event.target.closest(".help");
+  if (help && event.target.closest(".info")) toggleHelp(help);
+  else if (!help) closeHelps();
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") return;
+  closeHelps();
+  document.querySelectorAll(".help").forEach((help) => help.classList.add("dismissed"));
+});
 setRecording(false);
 
 guarded(loadProfiles)();

@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | `accepted` |
+| Status | `in-progress` |
 | Created | 2026-11-08 |
 | Last updated | 2026-11-08 |
 | Depends on | [0001](0001-mvp.md), [0002](0002-listening-aids.md) |
@@ -156,9 +156,9 @@ An unknown `scene` returns 422. Without `scene` the session works as today.
 ## 9. Implementation plan
 
 **Stage 1 – hints**
-- [ ] Hint markup, styles and the click / Esc handler.
-- [ ] Hints on the existing controls from the table.
-- [ ] Manual check: mouse, keyboard (Tab, Esc), phone width in the browser.
+- [x] Hint markup, styles and the click / Esc handler.
+- [x] Hints on the existing controls from the table.
+- [x] Manual check: mouse, keyboard (Tab, Esc), phone width in the browser.
 
 **Stage 2 – session cleanup**
 - [ ] `last_active`, `expire_idle_sessions()`, log line.
@@ -201,3 +201,4 @@ An unknown `scene` returns 422. Without `scene` the session works as today.
 |---|---|
 | 2026-11-08 | Document created. |
 | 2026-11-08 | Accepted; open questions resolved with the proposed answers. |
+| 2026-11-08 | Stage 1 implemented: (i) hints on the existing controls; profile form fields use a `.field` wrapper so the (i) sits outside the `<label>` (a button inside a label would become its labelled control); the text field hint has only its first sentence until stage 5. |

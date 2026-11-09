@@ -26,7 +26,7 @@
       </form>
 
       <div id="topic-box" hidden>
-        <h2><span class="step">2</span> O czym rozmawiamy?</h2>
+        <h2><span class="step">2</span> O czym rozmawiamy? <span class="help"><button type="button" class="info" aria-label="Wyjaśnienie" aria-expanded="false" aria-describedby="tip-topics">i</button><span class="tip" role="tooltip" id="tip-topics">Wybierz temat i po prostu rozmawiaj. Możesz też wpisać własny.</span></span></h2>
         <div id="topics" class="topics"></div>
         <form id="start-form" class="row">
           <input id="topic" placeholder="własny temat, np. my last weekend" maxlength="80" required>
@@ -38,28 +38,28 @@
     <section id="profile-view" hidden>
       <h2>Profil</h2>
       <form id="profile-form" class="sheet">
-        <label><span>Imię</span><input name="name" maxlength="40" required></label>
-        <label><span>Poziom</span>
-          <select name="level">
+        <div class="field"><span class="name"><label for="p-name">Imię</label></span><input id="p-name" name="name" maxlength="40" required></div>
+        <div class="field"><span class="name"><label for="p-level">Poziom</label> <span class="help"><button type="button" class="info" aria-label="Wyjaśnienie" aria-expanded="false" aria-describedby="tip-level">i</button><span class="tip" role="tooltip" id="tip-level">Twój poziom angielskiego, od A1 (początkujący) do C2 (biegły). Tutor dopasuje do niego słówka i długość zdań. Nie wiesz? Wybierz B1.</span></span></span>
+          <select id="p-level" name="level">
             <option>A1</option><option>A2</option><option>B1</option>
             <option>B2</option><option>C1</option><option>C2</option>
           </select>
-        </label>
-        <label><span>Lubię rozmawiać o</span><textarea name="interests" rows="2"></textarea><small>oddziel przecinkami</small></label>
-        <label><span>Mój cel</span><textarea name="goals" rows="2" maxlength="300"></textarea></label>
-        <label><span>Omijamy tematy</span><textarea name="avoid_topics" rows="2"></textarea><small>oddziel przecinkami</small></label>
-        <label><span>Poprawiaj mnie</span>
-          <select name="correction_style">
+        </div>
+        <div class="field"><span class="name"><label for="p-interests">Lubię rozmawiać o</label> <span class="help"><button type="button" class="info" aria-label="Wyjaśnienie" aria-expanded="false" aria-describedby="tip-interests">i</button><span class="tip" role="tooltip" id="tip-interests">Te tematy pojawią się jako przyciski, gdy będziesz zaczynać rozmowę.</span></span></span><textarea id="p-interests" name="interests" rows="2"></textarea><small>oddziel przecinkami</small></div>
+        <div class="field"><span class="name"><label for="p-goals">Mój cel</label> <span class="help"><button type="button" class="info" aria-label="Wyjaśnienie" aria-expanded="false" aria-describedby="tip-goals">i</button><span class="tip" role="tooltip" id="tip-goals">Po co uczysz się angielskiego, np. „rozmowy w pracy”. Tutor będzie do tego nawiązywać.</span></span></span><textarea id="p-goals" name="goals" rows="2" maxlength="300"></textarea></div>
+        <div class="field"><span class="name"><label for="p-avoid_topics">Omijamy tematy</label> <span class="help"><button type="button" class="info" aria-label="Wyjaśnienie" aria-expanded="false" aria-describedby="tip-avoid">i</button><span class="tip" role="tooltip" id="tip-avoid">Tematy, o które tutor nigdy nie zapyta.</span></span></span><textarea id="p-avoid_topics" name="avoid_topics" rows="2"></textarea><small>oddziel przecinkami</small></div>
+        <div class="field"><span class="name"><label for="p-correction_style">Poprawiaj mnie</label> <span class="help"><button type="button" class="info" aria-label="Wyjaśnienie" aria-expanded="false" aria-describedby="tip-correction">i</button><span class="tip" role="tooltip" id="tip-correction">Łagodnie: tutor poprawia tylko ważne błędy. Dokładnie: poprawia każdy błąd.</span></span></span>
+          <select id="p-correction_style" name="correction_style">
             <option value="gentle">łagodnie, tylko ważne błędy</option>
             <option value="strict">dokładnie, każdy błąd</option>
           </select>
-        </label>
-        <label><span>Rozpoznawanie mowy</span>
-          <select name="speech_language">
+        </div>
+        <div class="field"><span class="name"><label for="p-speech_language">Rozpoznawanie mowy</label> <span class="help"><button type="button" class="info" aria-label="Wyjaśnienie" aria-expanded="false" aria-describedby="tip-speech">i</button><span class="tip" role="tooltip" id="tip-speech">Zostaw „automatycznie”. „Zawsze po angielsku” pomaga, gdy aplikacja zapisuje twoje angielskie zdania jak polskie słowa.</span></span></span>
+          <select id="p-speech_language" name="speech_language">
             <option value="auto">automatycznie (rozpoznaje też polskie słowa)</option>
             <option value="en">zawsze po angielsku (przy mocnym akcencie)</option>
           </select>
-        </label>
+        </div>
         <div class="row">
           <button type="submit">Zapisz</button>
           <button id="cancel-profile" class="link" type="button">anuluj</button>
@@ -69,10 +69,11 @@
 
     <section id="chat-view" hidden>
       <div class="chat-head">
-        <h2>Temat: <span id="chat-topic"></span></h2>
+        <h2>Temat: <span id="chat-topic"></span> <span class="help"><button type="button" class="info" aria-label="Wyjaśnienie" aria-expanded="false" aria-describedby="tip-chat">i</button><span class="tip" role="tooltip" id="tip-chat">Pod twoim zdaniem pojawi się „poprawki”, jeśli tutor znalazł błąd. Pod odpowiedzią tutora „przetłumacz” pokazuje ją po polsku.</span></span></h2>
         <div class="row">
           <button id="new-session" class="link" type="button">nowa rozmowa</button>
           <button id="end-session" type="button">zakończ sesję</button>
+          <span class="help"><button type="button" class="info" aria-label="Wyjaśnienie" aria-expanded="false" aria-describedby="tip-end">i</button><span class="tip" role="tooltip" id="tip-end">„zakończ sesję” kończy rozmowę i pokazuje podsumowanie: błędy, słówka i wskazówkę. „nowa rozmowa” wraca do wyboru tematu bez podsumowania.</span></span>
         </div>
       </div>
       <div id="transcript" class="transcript"></div>
@@ -81,12 +82,15 @@
         <div class="voice">
           <button id="mic" class="mic" type="button"><span class="dot"></span><span id="mic-label"></span></button>
           <span class="hint">albo trzymaj spację</span>
+          <span class="help"><button type="button" class="info" aria-label="Wyjaśnienie" aria-expanded="false" aria-describedby="tip-mic">i</button><span class="tip" role="tooltip" id="tip-mic">Przytrzymaj przycisk (albo spację), powiedz zdanie po angielsku i puść. Tutor odpowie głosem.</span></span>
           <button id="repeat" class="link" type="button" hidden>powtórz</button>
           <button id="slower" class="link" type="button" hidden>wolniej</button>
+          <span id="replay-help" hidden><span class="help"><button type="button" class="info" aria-label="Wyjaśnienie" aria-expanded="false" aria-describedby="tip-replay">i</button><span class="tip" role="tooltip" id="tip-replay">„powtórz” odtwarza ostatnią odpowiedź tutora jeszcze raz, „wolniej” – w wolniejszym tempie.</span></span></span>
         </div>
         <form id="text-form" class="row">
           <input id="text" placeholder="albo napisz po angielsku" maxlength="1000" autocomplete="off" required>
           <button type="submit" class="link">wyślij</button>
+          <span class="help"><button type="button" class="info" aria-label="Wyjaśnienie" aria-expanded="false" aria-describedby="tip-text">i</button><span class="tip" role="tooltip" id="tip-text">Możesz też pisać po angielsku zamiast mówić.</span></span>
         </form>
       </div>
     </section>
@@ -95,7 +99,7 @@
         <h2>Podsumowanie</h2>
         <button id="summary-new" class="link" type="button">nowa rozmowa</button>
       </div>
-      <p id="summary-duration" class="status"></p>
+      <p class="status"><span id="summary-duration"></span> <span class="help"><button type="button" class="info" aria-label="Wyjaśnienie" aria-expanded="false" aria-describedby="tip-cost">i</button><span class="tip" role="tooltip" id="tip-cost">Przybliżony koszt tej rozmowy w usłudze OpenAI, z której korzysta tutor.</span></span></p>
       <p id="summary-empty" hidden>Rozmowa była za krótka na podsumowanie. Następnym razem powiedz coś więcej!</p>
       <div id="summary-content">
         <div><h3>Do poprawy</h3><div id="summary-corrections"></div></div>

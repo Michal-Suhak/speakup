@@ -149,7 +149,7 @@ button.link:hover { color: var(--pen); background: none; }
   box-shadow: inset 0 -14px 0 var(--marker);
 }
 
-.sheet label {
+.field {
   display: grid;
   grid-template-columns: 190px 1fr;
   column-gap: 16px;
@@ -157,8 +157,52 @@ button.link:hover { color: var(--pen); background: none; }
   margin-bottom: calc(var(--line) / 2);
 }
 
-.sheet label span { color: var(--pencil); font-style: italic; }
-.sheet label small { grid-column: 2; color: var(--pencil); font: 12px/20px var(--mono); }
+.field .name { color: var(--pencil); font-style: italic; }
+.field small { grid-column: 2; color: var(--pencil); font: 12px/20px var(--mono); }
+
+.help { position: relative; display: inline-block; vertical-align: middle; }
+
+button.info {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--pencil);
+  border-radius: 50%;
+  background: none;
+  color: var(--pencil);
+  font: italic 600 14px/22px var(--serif);
+  text-transform: none;
+}
+
+button.info:hover, .help.open button.info { background: none; color: var(--pen); border-color: var(--pen); }
+button.info:focus-visible { outline: 2px solid var(--pen); outline-offset: 2px; }
+
+.tip {
+  display: none;
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 8px);
+  left: 0;
+  width: max-content;
+  max-width: min(280px, 90vw);
+  padding: 8px 12px;
+  background: var(--ink);
+  color: var(--paper);
+  font: normal 400 15px/22px var(--serif);
+  text-align: left;
+  text-transform: none;
+  letter-spacing: normal;
+  white-space: normal;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.2);
+}
+
+/* keeps the hover alive while the pointer moves from the (i) to the tooltip */
+.tip::before { content: ""; position: absolute; left: 0; right: 0; top: -8px; height: 8px; }
+.tip.above { top: auto; bottom: calc(100% + 8px); }
+.tip.above::before { top: auto; bottom: -8px; }
+
+.help:hover .tip, .help:has(.info:focus-visible) .tip, .help.open .tip { display: block; }
+.help.dismissed .tip { display: none; }
 
 .chat-head {
   display: flex;
@@ -284,5 +328,5 @@ details[open] summary { text-decoration: underline; }
   body { background: repeating-linear-gradient(transparent 0 calc(var(--line) - 1px), var(--rule) calc(var(--line) - 1px) var(--line)), var(--paper); }
   main { padding-left: 16px; padding-right: 16px; }
   .step { margin-left: 0; width: auto; }
-  .sheet label { grid-template-columns: 1fr; }
+  .field { grid-template-columns: 1fr; }
 }
