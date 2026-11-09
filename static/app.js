@@ -10,6 +10,7 @@ const TEXT = {
   tutorName: "Tutor",
   corrections: (count) => `poprawki: ${count}`,
   translate: "przetłumacz",
+  showText: "pokaż tekst",
   hideTranslation: "ukryj tłumaczenie",
   micIdle: "przytrzymaj i mów",
   micRecording: "nagrywam… puść, aby wysłać",
@@ -221,8 +222,26 @@ function addTranslation(message, text) {
   message.append(details);
 }
 
+function conceal(message) {
+  const line = message.parentElement;
+  const show = document.createElement("button");
+  show.type = "button";
+  show.className = "link show-text";
+  show.textContent = TEXT.showText;
+  show.onclick = () => reveal(line);
+  line.classList.add("concealed");
+  line.append(show);
+}
+
+function reveal(line) {
+  line.classList.remove("concealed");
+  line.querySelector(".show-text")?.remove();
+}
+
 function addReply(data) {
-  addTranslation(addMessage("tutor", data.reply), data.reply_pl);
+  const message = addMessage("tutor", data.reply);
+  addTranslation(message, data.reply_pl);
+  if ($("listening").checked) conceal(message);
   speak(data.audio);
 }
 
@@ -499,6 +518,9 @@ window.addEventListener("pagehide", () => {
 $("end-session").onclick = guarded(endSession);
 $("summary-new").onclick = () => show("start-view");
 $("repeat").onclick = guarded(() => playReply());
+$("listening").onchange = () => {
+  if (!$("listening").checked) document.querySelectorAll(".line.concealed").forEach(reveal);
+};
 $("slower").onclick = guarded(() => playReply(SLOW_RATE));
 player.onended = () => setSpeaking(false);
 player.onerror = () => setSpeaking(false);

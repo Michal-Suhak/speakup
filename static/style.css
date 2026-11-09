@@ -285,8 +285,9 @@ details[open] summary { text-decoration: underline; }
 
 .voice {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 16px;
+  gap: 8px 16px;
   margin-bottom: 8px;
 }
 
@@ -314,6 +315,10 @@ details[open] summary { text-decoration: underline; }
 @keyframes pulse { 50% { opacity: 0.25; } }
 
 .hint { color: var(--pencil); font: italic 15px/var(--line) var(--serif); }
+
+.toggle { display: inline-flex; align-items: center; gap: 6px; color: var(--pencil); font: italic 16px/var(--line) var(--serif); cursor: pointer; }
+.toggle input { accent-color: var(--pen); width: 18px; height: 18px; margin: 0; }
+.concealed .said { display: none; }
 
 .error {
   display: inline-block;
