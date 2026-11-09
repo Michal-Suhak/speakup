@@ -49,7 +49,7 @@ A learner who has never seen the app understands every control from short Polish
 - `static/index.html`, `static/style.css`, `static/app.js` – hint markup and behaviour, listening switch, scene buttons, new texts.
 - `tutor/session.py` – `last_active` on `Session`, refreshed by `turn()`; `expire_idle_sessions()` removes sessions idle for more than `SESSION_IDLE_MINUTES = 30` and not busy, logging id, idle minutes and cost; called from `register_session` and `get_session`, so no background thread is needed.
 - `api/sessions.py` – `StartRequest.scene` (optional); the start endpoint checks it against the known scenes.
-- `prompts/scenes/<id>.md` – one file per scene with the role and situation in English.
+- `prompts/scenes/<id>.md` – one file per scene with the role and situation in English; the file names are the list of known scenes (`llm.SCENES`), and a test checks that the buttons in `index.html` match them. How to add a scene: README.
 - `prompts/tutor.md` – a `$scene` section and a "Jak powiedzieć" rule.
 - `tutor/llm.py` – renders the scene text (or "none") into the system prompt.
 
@@ -205,3 +205,4 @@ An unknown `scene` returns 422. Without `scene` the session works as today.
 | 2026-11-08 | Stage 2 implemented: sessions idle for more than 30 minutes are removed on the next request and logged with their cost; new expired message. |
 | 2026-11-08 | Stage 3 implemented: "ukryj tekst tutora" switch hides new tutor lines behind "pokaż tekst"; switching it off reveals all. |
 | 2026-11-08 | Stage 4 implemented: six scenes in `prompts/scenes/`, `scene` in the start request (closed list, 422 otherwise), scene buttons on the start screen; the scene section renders "none" without a scene. |
+| 2026-11-09 | Review change: the scene list is read from the file names in `prompts/scenes/` instead of a constant; a test checks the scene buttons against the files; README describes how to add a scene. |
