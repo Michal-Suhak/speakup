@@ -33,7 +33,7 @@ Code never gets ahead of the document: if the implementation differs from the sp
 |---|---|---|---|
 | 0001 | [MVP: voice English tutor](0001-mvp.md) | `done` | STT → chat → TTS loop, profiles, corrections, session summary. |
 | 0002 | [Listening aids: reply translation, slower repeat, English-only transcription](0002-listening-aids.md) | `in-progress` | Polish translation under tutor lines, 0.75× replay, `language="en"` option in the profile. |
-| 0003 | [Practice modes and plain-language help](0003-practice-modes.md) | `in-progress` | Tooltips with (i), idle session cleanup, listening mode, scenes, "Jak powiedzieć…?". |
+| 0003 | [Practice modes and plain-language help](0003-practice-modes.md) | `done` | Tooltips with (i), idle session cleanup, listening mode, scenes, "Jak powiedzieć…?". |
 | 0004 | [Session history](0004-session-history.md) | `accepted` | Ended sessions saved as JSON with their summary, list and delete on the start screen. |
 | 0005 | [Self-correction first](0005-self-correction.md) | `accepted` | Optional hint and one retry before an important mistake is corrected. |
 | – | [Online deployment with accounts and spending limits](online-deployment.md) | `draft` | Neon database, per-profile login, monthly limits, admin commands, Cloud Run. |
