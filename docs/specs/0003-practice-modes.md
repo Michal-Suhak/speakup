@@ -2,9 +2,9 @@
 
 | Field | Value |
 |---|---|
-| Status | `in-progress` |
+| Status | `done` |
 | Created | 2026-11-08 |
-| Last updated | 2026-11-08 |
+| Last updated | 2026-11-14 |
 | Depends on | [0001](0001-mvp.md), [0002](0002-listening-aids.md) |
 | Supersedes | – |
 
@@ -177,7 +177,7 @@ An unknown `scene` returns 422. Without `scene` the session works as today.
 
 **Stage 5 – "Jak powiedzieć…?"**
 - [x] Prompt rule, text field hint.
-- [ ] Manual check by text and voice.
+- [x] Manual check by text and voice.
 
 ## 10. Acceptance criteria
 
@@ -208,3 +208,4 @@ An unknown `scene` returns 422. Without `scene` the session works as today.
 | 2026-11-08 | Stage 4 implemented: six scenes in `prompts/scenes/`, `scene` in the start request (closed list, 422 otherwise), scene buttons on the start screen; the scene section renders "none" without a scene. |
 | 2026-11-09 | Review change: the scene list is read from the file names in `prompts/scenes/` instead of a constant; a test checks the scene buttons against the files; README describes how to add a scene. |
 | 2026-11-08 | Stage 5 implemented: "jak powiedzieć…" rule in `prompts/tutor.md`, second sentence of the text field hint. All 15 hints checked at 360 px. Voice check of the question still open. |
+| 2026-11-14 | Voice check of "jak powiedzieć…" passed; all acceptance criteria met, status `done`. |
