@@ -2,9 +2,9 @@
 
 | Field | Value |
 |---|---|
-| Status | `in-progress` |
+| Status | `done` |
 | Created | 2026-10-29 |
-| Last updated | 2026-10-29 |
+| Last updated | 2026-11-14 |
 | Depends on | [0001](0001-mvp.md) |
 | Supersedes | – |
 
@@ -146,7 +146,7 @@ Profile, new field (default `auto`):
 
 **Stage 2 – slower repeat**
 - [x] "wolniej" button, rate reset in "powtórz" and for every new reply, disabled and hidden with "powtórz".
-- [ ] Manual check in Chrome and Safari.
+- [x] Manual check in Chrome and Safari.
 
 **Stage 3 – reply translation**
 - [x] `reply_pl` in `TutorTurn`, prompt field order line.
@@ -181,3 +181,4 @@ Profile, new field (default `auto`):
 | 2026-10-29 | Stage 1 implemented: `speech_language` in the profile and the profile form, `language="en"` passed to transcription. |
 | 2026-10-29 | Stage 2 implemented: "wolniej" replays the last reply at 0.75× in the browser. |
 | 2026-10-30 | Stage 3 implemented: `reply_pl` with a translation toggle; gender rule moved into a "Polish translation" section of `prompts/tutor.md` after the manual check. |
+| 2026-11-14 | Safari check of "wolniej" passed; all acceptance criteria met, status `done`. |
