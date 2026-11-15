@@ -7,7 +7,7 @@ A local tutor for practising spoken English. You talk to it by voice, it answers
 ## Requirements
 
 - macOS, Linux or Windows
-- [uv](https://docs.astral.sh/uv/) (it installs a matching Python version itself)
+- [uv](https://docs.astral.sh/uv/) (it installs the Python version pinned in `.python-version` itself)
 - an OpenAI API key ([platform.openai.com](https://platform.openai.com/api-keys)); the API is billed separately from ChatGPT, so set a spending limit on your account
 
 ## Windows: one click
